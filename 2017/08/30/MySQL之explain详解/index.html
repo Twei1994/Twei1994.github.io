@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MySQL之explain详解 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言之前知道通过 explain 指令可以查看 SQL 查询语句的性能，但详细来说，每个字段表示什么意思，怎么说明 SQL 的性能，确实不太清楚。今天就认真学习下 explain 的用法。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL之explain详解">
+<meta property="og:url" content="http://yoursite.com/2017/08/30/MySQL之explain详解/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言之前知道通过 explain 指令可以查看 SQL 查询语句的性能，但详细来说，每个字段表示什么意思，怎么说明 SQL 的性能，确实不太清楚。今天就认真学习下 explain 的用法。">
+<meta property="og:updated_time" content="2017-08-30T11:17:58.455Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL之explain详解">
+<meta name="twitter:description" content="前言之前知道通过 explain 指令可以查看 SQL 查询语句的性能，但详细来说，每个字段表示什么意思，怎么说明 SQL 的性能，确实不太清楚。今天就认真学习下 explain 的用法。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-MySQL之explain详解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/30/MySQL之explain详解/" class="article-date">
+  <time datetime="2017-08-30T07:40:24.000Z" itemprop="datePublished">2017-08-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL之explain详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前知道通过 explain 指令可以查看 SQL 查询语句的性能，但详细来说，每个字段表示什么意思，怎么说明 SQL 的性能，确实不太清楚。今天就认真学习下 explain 的用法。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><pre><code>EXPLAIN tbl_name
+EXPLAIN [EXTENDED] SELECT select_options
+</code></pre><p>前者可以得出一个表的字段结构等等，后者主要是给出该 SQL 语句相关的一些信息，这里讲述的是后者。下面是一个实例：</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user;
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | index | NULL          | PRIMARY | 4       | NULL |   37 | Using index |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+1 row in set (0.00 sec)
+</code></pre><h3 id="字段值详解"><a href="#字段值详解" class="headerlink" title="字段值详解"></a>字段值详解</h3><p>下面解释下每个字段值的含义：</p>
+<h4 id="id"><a href="#id" class="headerlink" title="id"></a>id</h4><p>select 查询序列号，表示 SQL 语句执行的顺序，通常不重要。</p>
+<h4 id="select-type"><a href="#select-type" class="headerlink" title="select_type"></a>select_type</h4><p>查询的类型，主要是区别普通查询和联合查询、子查询之类的复杂查询。</p>
+<p>常见取值有：</p>
+<ul>
+<li>SIMPLE</li>
+</ul>
+<p>它表示简单的 select，没有 union 和子查询；</p>
+<ul>
+<li>PRIMARY</li>
+</ul>
+<p>最外面的 select，在有子查询的语句中，最外面的 select 查询就是 primary；</p>
+<ul>
+<li>NNION </li>
+</ul>
+<p>union 语句的第二个或者说是后面那一个；</p>
+<ul>
+<li>DEPENDENT UNION</li>
+<li>NUION RESULT </li>
+</ul>
+<h4 id="table"><a href="#table" class="headerlink" title="table"></a>table</h4><p>输出的行所用的表。</p>
+<h4 id="type"><a href="#type" class="headerlink" title="type"></a>type</h4><p>连接所使用的类型，是较为重要的一个指标。</p>
+<ul>
+<li>system</li>
+</ul>
+<p>表仅有一行，是 const 类型的特例。不常见。</p>
+<ul>
+<li>const</li>
+</ul>
+<p>常量查询，在整个查询过程中这个表最多只会有一条匹配的行，用到了 primary key 或者unique 索引。</p>
+<p>比如主键 id=1 就肯定只有一行，只需读取一次表数据便能取得所需的结果，且表数据在分解执行计划时读取。</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user where user_id =1;
++----+-------------+----------+-------+---------------+---------+---------+-------+------+-------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref   | rows | Extra       |
++----+-------------+----------+-------+---------------+---------+---------+-------+------+-------------+
+|  1 | SIMPLE      | dsp_user | const | PRIMARY       | PRIMARY | 4       | const |    1 | Using index |
++----+-------------+----------+-------+---------------+---------+---------+-------+------+-------------+
+</code></pre><ul>
+<li>eq_ref</li>
+</ul>
+<p>对于每个来自于前面的表的行组合，从该表中读取一行。</p>
+<p>个人理解是在联合查询时，使用的条件是 UNIQUE 或 PRIMARY KEY。</p>
+<pre><code>mysql&gt; explain select department from dsp_user,dsp_expert where dsp_user.user_id = dsp_expert.user_id;
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+| id | select_type | table      | type   | possible_keys | key     | key_len | ref                       | rows | Extra                    |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+|  1 | SIMPLE      | dsp_expert | ALL    | PRIMARY       | NULL    | NULL    | NULL                      |   20 | NULL                     |
+|  1 | SIMPLE      | dsp_user   | eq_ref | PRIMARY       | PRIMARY | 4       | dsplab.dsp_expert.user_id |    1 | Using where; Using index |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+</code></pre><ul>
+<li>ref</li>
+</ul>
+<p>对于每个来自于前面的表的行组合，所有有匹配索引值的行将从这张表中读取。</p>
+<p>如果联接只使用键的最左边的前缀，或如果键不是 UNIQUE 或 PRIMARY KEY（换句话说，如果联接不能基于关键字选择单个行的话），则使用 ref。如果使用的键仅仅匹配少量行，该联接类型是不错的。</p>
+<ul>
+<li>fulltext</li>
+<li>ref_or_null</li>
+</ul>
+<p>该联接类型如同 ref，但是添加了 MySQL 可以专门搜索包含 NULL 值的行。</p>
+<p>在解决子查询中经常使用该联接类型的优化。</p>
+<ul>
+<li>index_merge</li>
+<li>unique_subquery</li>
+<li><p>index_subquery</p>
+</li>
+<li><p>range</p>
+</li>
+</ul>
+<p>给定范围内的检索，使用一个索引来检查行。通常发生在在索引列上使用范围查询，如 &gt;，&lt;，in 等时，非索引列是 ALL。</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user where user_id in (1,2);
++----+-------------+----------+-------+---------------+---------+---------+------+------+--------------------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref  | rows | Extra                    |
++----+-------------+----------+-------+---------------+---------+---------+------+------+--------------------------+
+|  1 | SIMPLE      | dsp_user | range | PRIMARY       | PRIMARY | 4       | NULL |    2 | Using where; Using index |
++----+-------------+----------+-------+---------------+---------+---------+------+------+--------------------------+
+</code></pre><ul>
+<li>index</li>
+</ul>
+<p>按索引次序扫描，先读索引，再读实际的行，结果也是全表扫描，主要优点是避免了排序。（索引是排好序的，并且 all 是从硬盘中读的，index 可能不在硬盘上）</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user order by user_id;
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | index | NULL          | PRIMARY | 4       | NULL |   37 | Using index |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+</code></pre><ul>
+<li>ALL</li>
+</ul>
+<p>进行完整的表扫描。性能很差，通常可以增加更多的索引而不要使用 ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user where user_name = &quot;sss&quot;;
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+| id | select_type | table    | type | possible_keys | key  | key_len | ref  | rows | Extra       |
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | ALL  | NULL          | NULL | NULL    | NULL |   37 | Using where |
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+</code></pre><p>结果值从好到坏依次是：</p>
+<pre><code>system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL
+</code></pre><p>一般来说，得保证查询至少达到 range 级别，最好能达到 ref。</p>
+<h4 id="possible-key"><a href="#possible-key" class="headerlink" title="possible_key"></a>possible_key</h4><p>提示使用哪个索引会在该表中找到行，不太重要。</p>
+<h4 id="key"><a href="#key" class="headerlink" title="key"></a>key</h4><p>显示实际使用的键。如果是 NULL，表示没有索引被选择。</p>
+<h4 id="key-len"><a href="#key-len" class="headerlink" title="key_len"></a>key_len</h4><p>使用的索引长度。</p>
+<h4 id="ref"><a href="#ref" class="headerlink" title="ref"></a>ref</h4><p>显示哪个字段或常数与索引 key 一起被使用。</p>
+<h4 id="rows"><a href="#rows" class="headerlink" title="rows"></a>rows</h4><p>显示执行查询的行数（而不是返回的行数），数值越大越不好，说明没有用好索引。但对 InnoDB 不太准。</p>
+<h4 id="Extra"><a href="#Extra" class="headerlink" title="Extra"></a>Extra</h4><p>显示以上信息之外的其他信息，可能取值有以下几个：</p>
+<ul>
+<li>Using index</li>
+</ul>
+<p>此查询使用了覆盖索引（Covering Index），即通过索引就能返回结果，无需访问表。</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user;
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | index | NULL          | PRIMARY | 4       | NULL |   37 | Using index |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+</code></pre><ul>
+<li>Using where</li>
+</ul>
+<p>表示 MySQL 服务器从存储引擎收到行后再进行“后过滤”（Post-filter）。所谓“后过滤”，就是先读取整行数据，再检查此行是否符合 where 句的条件，符合就留下，不符合便丢弃。因为检查是在读取行后才进行的，所以称为“后过滤”。查询中含有 WHERE 子句时较常见。</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user where user_name = &quot;twei&quot;;
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+| id | select_type | table    | type | possible_keys | key  | key_len | ref  | rows | Extra       |
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | ALL  | NULL          | NULL | NULL    | NULL |   37 | Using where |
++----+-------------+----------+------+---------------+------+---------+------+------+-------------+
+</code></pre><ul>
+<li>Using filesort</li>
+</ul>
+<p>若查询所需的排序与使用的索引的排序一致，因为索引是已排序的，因此按索引的顺序读取结果返回，否则，在取得结果后，还需要按查询所需的顺序对结果进行排序，这时就会出现 Using filesort。</p>
+<p>例如下面，user_id 是主键，所以它是索引。当 <code>order by user_id</code> 时，Extra 是 Using Index，而对别的列进行排序，就是 Using filesort，表示在查询之后，又进行了一次排序。</p>
+<p>Using filesort（对非索引列排序）:</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user order by user_name;
++----+-------------+----------+------+---------------+------+---------+------+------+----------------+
+| id | select_type | table    | type | possible_keys | key  | key_len | ref  | rows | Extra          |
++----+-------------+----------+------+---------------+------+---------+------+------+----------------+
+|  1 | SIMPLE      | dsp_user | ALL  | NULL          | NULL | NULL    | NULL |   37 | Using filesort |
++----+-------------+----------+------+---------------+------+---------+------+------+----------------+
+</code></pre><p>Using index（对索引列排序）:</p>
+<pre><code>mysql&gt; explain select user_id from dsp_user order by user_id;
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+| id | select_type | table    | type  | possible_keys | key     | key_len | ref  | rows | Extra       |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+|  1 | SIMPLE      | dsp_user | index | NULL          | PRIMARY | 4       | NULL |   37 | Using index |
++----+-------------+----------+-------+---------------+---------+---------+------+------+-------------+
+</code></pre><ul>
+<li>Using temporary</li>
+</ul>
+<p>需要创建临时表存储结果以完成查询。这种情况通常发生在查询时包含了 Group By 和 Order By 子句时或者联合查询时。</p>
+<p>下面的例子显示了联合查询时出现的 Using temporary 的现象：</p>
+<pre><code>mysql&gt; explain select dsp_user.user_id,department from dsp_user,dsp_expert where dsp_user.user_id = dsp_expert.user_id order by dsp_user.user_id; 
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+---------------------------------+
+| id | select_type | table      | type   | possible_keys | key     | key_len | ref                       | rows | Extra                           |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+---------------------------------+
+|  1 | SIMPLE      | dsp_expert | ALL    | PRIMARY       | NULL    | NULL    | NULL                      |   20 | Using temporary; Using filesort |
+|  1 | SIMPLE      | dsp_user   | eq_ref | PRIMARY       | PRIMARY | 4       | dsplab.dsp_expert.user_id |    1 | Using where; Using index        |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+---------------------------------+
+</code></pre><p>一个有趣的现象是将上面的排序字段从 dsp_user.user_id 改成 dsp_expert.user_id 时，就不会使用临时表了。</p>
+<pre><code>mysql&gt; explain select dsp_user.user_id,department from dsp_user,dsp_expert where dsp_user.user_id = dsp_expert.user_id order by dsp_expert.user_id;
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+| id | select_type | table      | type   | possible_keys | key     | key_len | ref                       | rows | Extra                    |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+|  1 | SIMPLE      | dsp_expert | index  | PRIMARY       | PRIMARY | 4       | NULL                      |   20 | NULL                     |
+|  1 | SIMPLE      | dsp_user   | eq_ref | PRIMARY       | PRIMARY | 4       | dsplab.dsp_expert.user_id |    1 | Using where; Using index |
++----+-------------+------------+--------+---------------+---------+---------+---------------------------+------+--------------------------+
+</code></pre><p>原因在于 MySQL 在联合查询时，会有一个驱动表的概念，对驱动表可以直接排序，对非驱动表（的字段排序）需要对循环查询的合并结果（临时表）进行排序。在 explain 的结果中，处于上面的表是驱动表（这个例子中是 dsp_expert，所以对它的字段排序不用使用临时表）。</p>
+<blockquote>
+<p>当进行多表连接查询时， [驱动表] 的定义为：</p>
+<p>1）指定了联接条件时，满足查询条件的记录行数少的表为[驱动表]；</p>
+<p>2）未指定联接条件时，行数少的表为[驱动表]。</p>
+</blockquote>
+<ul>
+<li>Distinct</li>
+<li>Not exists</li>
+<li>range checked for each record</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li><p>explain 的四个重要字段：type、key、rows、extra；</p>
+</li>
+<li><p>如果 type 的值为 index 或者 ALL，那么说明该 SQL 性能一般，需要优化；</p>
+</li>
+<li><p>如果 key 的值为 NULL，说明该 SQL 没有使用索引，可以考虑在关键字段上增加索引；</p>
+</li>
+<li><p>row 的值代表了进行本次查询时，搜索记录的条数，当这个值特别大的时候，说明该 SQL 语句性能差；</p>
+</li>
+<li><p>如果 Extra 字段的值为 Using filesort 或 Using temporary，也是需要优化的，可以通过调整 order by 或者 group by 的字段来实现；</p>
+</li>
+<li><p>联合查询时，一定要多用 explain 来查看查询性能；</p>
+</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.csdn.net/zhuxineli/article/details/14455029" target="_blank" rel="noopener">MYSQL explain详解</a></p>
+<p><a href="http://blog.csdn.net/b1303110335/article/details/51174540" target="_blank" rel="noopener">mysql之explain详解（分析索引的最佳使用）</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/30/MySQL之explain详解/" data-id="cjecyyu6q00224cvndaie7svw" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/09/18/MySQL索引详解/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          MySQL索引详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/28/牛客网PHP工程师能力评估/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">牛客网PHP工程师能力评估</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

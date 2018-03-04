@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP爬取百度图片 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言最近在学用PHP处理图像，并且做了一个“瀑布流”布局的图片墙。但是遇到一个问题，就是图片不够用了，所以就写了一个脚本，通过关键词来下载百度图片。">
+<meta name="keywords" content="PHP,爬虫">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP爬取百度图片">
+<meta property="og:url" content="http://yoursite.com/2017/09/28/PHP爬取百度图片/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言最近在学用PHP处理图像，并且做了一个“瀑布流”布局的图片墙。但是遇到一个问题，就是图片不够用了，所以就写了一个脚本，通过关键词来下载百度图片。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/XHR.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/json.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/res.JPG">
+<meta property="og:updated_time" content="2017-09-28T14:55:44.044Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP爬取百度图片">
+<meta name="twitter:description" content="前言最近在学用PHP处理图像，并且做了一个“瀑布流”布局的图片墙。但是遇到一个问题，就是图片不够用了，所以就写了一个脚本，通过关键词来下载百度图片。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/XHR.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP爬取百度图片" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/28/PHP爬取百度图片/" class="article-date">
+  <time datetime="2017-09-28T12:59:06.000Z" itemprop="datePublished">2017-09-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP爬取百度图片
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在学用PHP处理图像，并且做了一个“瀑布流”布局的图片墙。但是遇到一个问题，就是图片不够用了，所以就写了一个脚本，通过关键词来下载百度图片。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>写爬虫的步骤就是以下这些：</p>
+<h3 id="找URL"><a href="#找URL" class="headerlink" title="找URL"></a>找URL</h3><p>在使用百度图片搜索的时候，生成的URL如下：</p>
+<pre><code>https://image.baidu.com/search/index?tn=baiduimage&amp;word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3
+</code></pre><p>可以看到，word参数就是我们要查询的关键字（经过了urlencode）。</p>
+<p>但是这是我们要找的URL吗？并不是。因为我们通过这个URL，我们只能得到大约30张图片。</p>
+<p>但是，当我们向下划鼠标时，我们发现更多的图片加载了出来。这是，浏览器地址栏的URL并没有发生变化。</p>
+<p>说明是<strong>异步</strong>调用了其他接口，这个接口才是我们要找的URL。</p>
+<p>那么，怎么找到它呢？答案是通过F12。点击F12，打开Chrome的开发者模式，找到Network下的XHR标签，再次向下滑动鼠标，发现浏览器确实进行了异步请求，截图如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/XHR.png" alt=""></p>
+<p>这个URL是这样的：</p>
+<pre><code>https://image.baidu.com/search/acjson?tn=resultjson_com&amp;ipn=rj&amp;ct=201326592&amp;is=&amp;fp=result&amp;queryWord+=&amp;cl=&amp;lm=&amp;ie=utf-8&amp;oe=utf-8&amp;adpicid=&amp;st=&amp;word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;z=&amp;ic=&amp;s=&amp;se=&amp;tab=&amp;width=&amp;height=&amp;face=&amp;istype=&amp;qc=&amp;nc=&amp;fr=&amp;step_word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;pn=120&amp;rn=30&amp;gsm=78&amp;1506604653115=
+</code></pre><p>URL很长，参数很多。将它粘贴在浏览器的地址栏，可以看到它的返回值，如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/json.png" alt=""></p>
+<p>可以看出是一个JSON格式的数据，从中我们可以发现，在data下有30个元素，每个对应着一张图片。</p>
+<p>通过观察，猜测参数<code>rn=30</code>是指每次调用返回的图片张数，修改该参数进行测试，发现猜测正确，但是最多只能返回30张。</p>
+<p>所以，想要一次获取多张图片，我们还需要更多的参数，然后比对下多个URL</p>
+<pre><code>https://image.baidu.com/search/acjson?tn=resultjson_com&amp;ipn=rj&amp;ct=201326592&amp;is=&amp;fp=result&amp;queryWord+=&amp;cl=&amp;lm=&amp;ie=utf-8&amp;oe=utf-8&amp;adpicid=&amp;st=&amp;word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;z=&amp;ic=&amp;s=&amp;se=&amp;tab=&amp;width=&amp;height=&amp;face=&amp;istype=&amp;qc=&amp;nc=&amp;fr=&amp;step_word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;pn=60&amp;rn=30&amp;gsm=3c&amp;1506608375614=
+</code></pre><p>发现<code>pn</code>这个参数在变化，而且是每次加30，所以猜想它是一个代表偏移量的参数。通过自己构造的URL确认了这个猜想。</p>
+<h3 id="爬取图片地址函数"><a href="#爬取图片地址函数" class="headerlink" title="爬取图片地址函数"></a>爬取图片地址函数</h3><p>得到了接口URL之后，就可以动手写爬虫函数了。</p>
+<pre><code>/**
+ * [spider 爬取百度图片]
+ * @param  [string] $keyword [搜索关键字]
+ * @param  [int] $num        [图片数量]
+ * @return [array]           [图片对应的地址]
+ */
+function spider($keyword, $num) {
+    $keyword = urlencode($keyword);
+    $res = array();
+    for ($pn = 0; $pn &lt;= $num; $pn += 30) { 
+        $url = &quot;http://image.baidu.com/search/acjson?tn=resultjson_com&amp;ipn=rj&amp;ct=201326592&amp;fp=result&amp;queryWord+=&amp;ie=utf-8&amp;oe=utf-8&amp;word=&quot;.$keyword.&quot;=&amp;pn=&quot;.$pn.&quot;&amp;rn=30&quot;; 
+        $json = file_get_contents($url);  
+        $array = json_decode($json);
+        foreach ($array-&gt;data as $key =&gt; $image) {
+            if (!in_array($image, $res)) {
+                if (isset($image-&gt;middleURL)) {
+                    $res[] = $image-&gt;middleURL;
+                }elseif (isset($image-&gt;thumbURL)){
+                    $res[] = $image-&gt;thumbURL;
+                }
+            }
+        }
+    }
+    return $res;
+}
+</code></pre><p>首先对关键字进行url编码，然后拼接URL，调用之后解析JSON，获取图片地址存入返回数组中即可。</p>
+<h3 id="下载图片到本地"><a href="#下载图片到本地" class="headerlink" title="下载图片到本地"></a>下载图片到本地</h3><p>得到了图片的地址之后，可以通过下面的函数将它下载到本地。</p>
+<pre><code>/**
+ * [download 下载图片到本地]
+ * @param  [string] $url     [图片地址]
+ * @param  [string] $path    [存储路径]
+ * @param  string $referer [HTTP Header中的referer值]
+ */
+function download($url, $path, $referer = &apos;&apos;) {
+    $filename = pathinfo($url, PATHINFO_BASENAME);
+    if (!file_exists($path.$filename)) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_REFERER, $referer);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+        $file = curl_exec($ch);
+        curl_close($ch);
+
+        $resource = fopen($path.$filename, &apos;a&apos;);
+        fwrite($resource, $file);
+        fclose($resource);
+    }
+}
+</code></pre><p>先判断指定路径下有没有同名图片，如果没有再进行下载。</p>
+<p>其中，<code>$referer</code>参数的含义是指HTTP Header中的referer值，目的在于跳过百度图片的防爬虫策略。因为如果不是从指定页面跳入图片地址，会返回一个403错误。</p>
+<h3 id="批量下载"><a href="#批量下载" class="headerlink" title="批量下载"></a>批量下载</h3><p>通常情况下，我们要下载的图片都大于1张，所以可以采用批量下载的方式。</p>
+<pre><code>/**
+ * [batchDownload 批量下载图片]
+ * @param  [type] $imgUrls [图片地址数组]
+ * @param  [type] $path    [目标路径]
+ * @param  string $referer [HTTP Header中的referer值]
+ */
+function batchDownload($imgUrls, $path, $referer = &apos;&apos;) {
+    foreach ($imgUrls as $key =&gt; $imgUrl) {
+        download($imgUrl, $path, $referer);    
+    }
+}
+</code></pre><p>就是一个循环调用<code>download()</code>的操作。</p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>写一个客户端类，代表用户行为。</p>
+<pre><code>set_time_limit(0);
+class Client {
+    public static function main() {
+        $keyword = &quot;新垣结衣&quot;;
+        $num = 60;
+        $path = &quot;spider_test/&quot;;
+        $referer = &quot;https://image.baidu.com/search/acjson?tn=resultjson_com&amp;ipn=rj&amp;ct=201326592&amp;is=&amp;fp=result&amp;queryWord+=&amp;cl=&amp;lm=&amp;ie=utf-8&amp;oe=utf-8&amp;adpicid=&amp;st=&amp;word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;z=&amp;ic=&amp;s=&amp;se=&amp;tab=&amp;width=&amp;height=&amp;face=&amp;istype=&amp;qc=&amp;nc=&amp;fr=&amp;step_word=%E6%96%B0%E5%9E%A3%E7%BB%93%E8%A1%A3&amp;pn=120&amp;rn=30&amp;gsm=78&amp;1506604653115=&quot;;
+        $images = spider($keyword, $num);
+        batchDownload($images, $path, $referer);
+    }
+}  
+Client::main(); 
+</code></pre><p>首先取消脚本时间限制，因为如果数量大的话，很可能会超时。</p>
+<p>脚本执行结束后，在<code>spider_test</code>路径下，可以看到下载的图片。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/baiduimg_spider/res.JPG" alt=""></p>
+<p>其实，更好的方式是将爬取和下载的这3个函数封装成一个类（download可以是私有的，有时间改一下）。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/09/28/PHP爬取百度图片/" data-id="cjecyyu8g00464cvnvgqfik1d" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/爬虫/">爬虫</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/10/01/PHP安全处理字符串/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP安全处理字符串
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/09/25/MySQL允许远程访问/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">MySQL允许远程访问</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP使用PDO访问数据库 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言PDO，PHP Data Objects的简称，是PHP访问数据库的抽象层，可以看作是一个连接数据库的接口，是PHP5之后推荐使用的连接数据库的方式。">
+<meta name="keywords" content="MySQL,PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP使用PDO访问数据库">
+<meta property="og:url" content="http://yoursite.com/2017/09/25/PHP使用PDO访问数据库/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言PDO，PHP Data Objects的简称，是PHP访问数据库的抽象层，可以看作是一个连接数据库的接口，是PHP5之后推荐使用的连接数据库的方式。">
+<meta property="og:updated_time" content="2017-09-25T12:45:23.341Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP使用PDO访问数据库">
+<meta name="twitter:description" content="前言PDO，PHP Data Objects的简称，是PHP访问数据库的抽象层，可以看作是一个连接数据库的接口，是PHP5之后推荐使用的连接数据库的方式。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP使用PDO访问数据库" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/25/PHP使用PDO访问数据库/" class="article-date">
+  <time datetime="2017-09-25T01:12:53.000Z" itemprop="datePublished">2017-09-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP使用PDO访问数据库
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>PDO，PHP Data Objects的简称，是PHP访问数据库的抽象层，可以看作是一个连接数据库的接口，是PHP5之后推荐使用的连接数据库的方式。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>它有以下几个优点：</p>
+<ol>
+<li>不管是哪种数据库，都可以通过这个接口来连接和操作数据，更换时只需要更换DSN（Data Source Name）即可（有点适配器模式那个意思）；</li>
+<li>可以有效防止SQL注入（预编译模式）；</li>
+</ol>
+<p>测试数据库内容如下：数据库名称为pdo_test，数据表名称为user。</p>
+<pre><code>mysql&gt; select * from user;
++----+-------+-------+
+| id | name  | score |
++----+-------+-------+
+|  1 | Twei  |    90 |
+|  2 | Alice |    90 |
+|  3 | Bob   |    80 |
+|  4 | Tony  |    70 |
+|  5 | Steve |   100 |
++----+-------+-------+
+5 rows in set (0.00 sec)
+</code></pre><h3 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h3><h4 id="连接数据库"><a href="#连接数据库" class="headerlink" title="连接数据库"></a>连接数据库</h4><pre><code>$dsn = &apos;mysql:host=localhost;dbname=pdo_test&apos;;
+$user = &apos;root&apos;;
+$pass = &apos;yourownpassword&apos;;
+
+try {
+    $dbh = new PDO($dns, $user, $pass);
+}catch(PDOException $e) {
+    echo &apos;Connection failed: &apos;,$e-&gt;getMessage();
+    die();
+}
+</code></pre><h4 id="查询操作"><a href="#查询操作" class="headerlink" title="查询操作"></a>查询操作</h4><p>有两种方式进行查询，分别是<code>query</code>（直接查询方式）和<code>prepare + execute</code>（预编译和参数绑定方式），第一种方式快捷方便，但存在SQL注入风险，所以建议使用第二种。</p>
+<p>预编译方式不仅防止了SQL注入，并且在插入或修改大量数据时，因为相关的SQL已经被执行过，所以直接读取即可，速度快。</p>
+<p><strong>query方式:</strong></p>
+<pre><code>$dbh-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$name = &apos;Twei&apos;;
+$sql = &apos;SELECT * FROM user WHERE name =&apos;.$dbh-&gt;quote($name);
+foreach ($dbh-&gt;query($sql) as $row) {
+    echo $row[&apos;id&apos;],&quot;\t&quot;,$row[&apos;name&apos;],&quot;\t&quot;,$row[&apos;score&apos;],&quot;\n&quot;;
+}
+</code></pre><blockquote>
+<p>setAttribute用于设置数据库句柄属性，如错误模式等；</p>
+</blockquote>
+<blockquote>
+<p>quote是对参数（一般为用户输入）进行转义，防止SQL注入；</p>
+</blockquote>
+<p>以上代码输出：</p>
+<pre><code>1    Twei    90
+</code></pre><p><strong>prepare + execute方式：</strong></p>
+<pre><code>$sql = &apos;SELECT * FROM user WHERE name =:name&apos;;
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+$stmt-&gt;execute();
+while ($row = $stmt-&gt;fetch(PDO::FETCH_ASSOC)) {
+    echo $row[&apos;id&apos;],&quot;\t&quot;,$row[&apos;name&apos;],&quot;\t&quot;,$row[&apos;score&apos;],&quot;&lt;br&gt;&quot;;
+}
+</code></pre><p>在SQL语句中，通过<code>:name</code>占位符来代替实际变量，然后在<code>bindParam</code>时将该占位符替换成实际的值，通过这种方式避免SQL注入。</p>
+<p><code>$dbh-&gt;prepare($sql)</code>返回一个PDOStatement对象，之后都是通过这个对象来进行操作。</p>
+<p><code>PDO::FETCH_ASSOC</code>指定获取方式，将对应结果集中的每一行作为一个由列名索引的数组返回。如果想返回对象，可以使用<code>PDO::FETCH_LAZY</code>或者调用<code>fetchObject</code>方法。</p>
+<h4 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h4><p>插入数据也是采用<code>prepare + execute</code>的方式，如果有多个参数，需要进行多次参数绑定。</p>
+<pre><code>$name = &apos;Logan&apos;;
+$score = 93;
+$sql = &apos;INSERT INTO user (name, score) VALUES (:name, :score)&apos;;
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+$stmt-&gt;bindParam(&apos;:score&apos;, $score, PDO::PARAM_INT);
+$stmt-&gt;execute();
+</code></pre><p>执行之后数据库中数据如下所示：</p>
+<pre><code>mysql&gt; select * from user;
++----+-------+-------+
+| id | name  | score |
++----+-------+-------+
+|  1 | Twei  |    90 |
+|  2 | Alice |    90 |
+|  3 | Bob   |    80 |
+|  4 | Tony  |    70 |
+|  5 | Steve |   100 |
+|  6 | Logan |    93 |
++----+-------+-------+
+6 rows in set (0.00 sec)
+</code></pre><h4 id="修改或删除数据"><a href="#修改或删除数据" class="headerlink" title="修改或删除数据"></a>修改或删除数据</h4><p>修改或删除数据也是采用<code>prepare + execute</code>的方式，如果有多个参数，需要进行多次参数绑定。</p>
+<pre><code>$name = &apos;Logan&apos;;
+$score = 95;
+$dbh-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$sql = &apos;UPDATE user SET score = :score WHERE name = :name&apos;;
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+$stmt-&gt;bindParam(&apos;:score&apos;, $score, PDO::PARAM_INT);
+$stmt-&gt;execute();
+</code></pre><p>执行之后数据库中数据如下所示：</p>
+<pre><code>mysql&gt; select * from user;
++----+-------+-------+
+| id | name  | score |
++----+-------+-------+
+|  1 | Twei  |    90 |
+|  2 | Alice |    90 |
+|  3 | Bob   |    80 |
+|  4 | Tony  |    70 |
+|  5 | Steve |   100 |
+|  6 | Logan |    95 |
++----+-------+-------+
+6 rows in set (0.00 sec)
+</code></pre><p>其实，通过预编译加上参数绑定方式进行增删改查，就是SQL语句不同，其余的都一样。</p>
+<h4 id="受影响的行数"><a href="#受影响的行数" class="headerlink" title="受影响的行数"></a>受影响的行数</h4><p>通过Statement的rowCount方法可以返回上一次操作影响到行数。</p>
+<pre><code>$score = 20;
+$sql = &apos;SELECT * FROM user WHERE score &gt; :score&apos;;
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:score&apos;, $score, PDO::PARAM_INT);
+$stmt-&gt;execute();
+echo $stmt-&gt;rowCount();
+</code></pre><h4 id="事务支持"><a href="#事务支持" class="headerlink" title="事务支持"></a>事务支持</h4><p>PDO也支持MySQL事务（transaction），包括start、commit和rollback等。</p>
+<pre><code>try{
+    $dbh-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dbh-&gt;beginTransaction();    // 事务开始
+    $sql = &apos;INSERT INTO user (name, score) VALUES (:name, :score)&apos;;
+    $stmt = $dbh-&gt;prepare($sql);
+    $stmt-&gt;execute(array(&apos;:name&apos; =&gt; &apos;Natasha&apos;, &apos;:score&apos; =&gt; 100));
+    $id = 1;
+    $sql = &apos;DELETE FROM user WHERE id= :id&apos;;
+    $stmt = $dbh-&gt;prepare($sql);
+    $stmt-&gt;bindParam(&apos;:id&apos;, $id, PDO::PARAM_INT);
+    $stmt-&gt;execute();
+    $dbh-&gt;commit();    // 提交事务
+}catch(PDOException $e){
+    // rollBack写在发生错误时
+    $dbh-&gt;rollBack();
+    echo &quot;Error occurred when execute SQL: &quot;, $sql, &quot;&lt;br&gt;&quot;;
+    echo &quot;Error info:&lt;br&gt;&quot;, $e-&gt;getMessage();
+}
+</code></pre><h4 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h4><p>PDO有3个错误提示等级，分别为<code>POD::ERRMODE_SILENT</code>（默认）、<code>POD::ERRMODE_WARNING</code>和<code>POD::ERRMODE_EXCEPTION</code>。</p>
+<p><strong>POD::ERRMODE_SILENT</strong></p>
+<p>不显示错误信息，会设置一个错误码，需要检查错误码来判断是否发生错误。</p>
+<pre><code>$name = &apos;Twei&apos;;
+$sql = &apos;SELECT * FROM users WHERE name =:name&apos;;   // 数据表名有误
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+$stmt-&gt;execute();
+$code = $stmt-&gt;errorCode();
+//var_dump($code);echo &apos;&lt;br&gt;&apos;;   // 输出错误码，string(5) &quot;42S02&quot; 
+if (empty($code)) {
+    while ($row = $stmt-&gt;fetchObject()) {
+        echo $row[&apos;id&apos;],&quot;\t&quot;,$row[&apos;name&apos;],&quot;\t&quot;,$row[&apos;score&apos;],&quot;&lt;br&gt;&quot;;
+    }
+}else{
+    echo &apos;Error occurred when execut SQL &apos;, $sql, &apos;&lt;br&gt;&apos;;
+    echo &apos;ErrorInfo:&lt;br&gt;&lt;pre&gt;&apos;;
+    var_dump($stmt-&gt;errorInfo());
+}
+</code></pre><p>执行结果如下：</p>
+<pre><code>Error occurred when execut SQL SELECT * FROM users WHERE name =:name
+ErrorInfo:
+array(3) {
+  [0]=&gt;
+  string(5) &quot;42S02&quot;
+  [1]=&gt;
+  int(1146)
+  [2]=&gt;
+  string(36) &quot;Table &apos;pdo_test.users&apos; doesn&apos;t exist&quot;
+}
+</code></pre><blockquote>
+<p>注意：这里的错误是Statement级别的，不是PHP级别，所以需要用<code>$stmt-&gt;errorInfo()</code>来获取错误信息。 </p>
+</blockquote>
+<p><strong>POD::ERRMODE_WARNING</strong></p>
+<p>在这个模式下，出错会产生一个PHP的警告（warning），同时也会设置Statement级别的errorinfo。</p>
+<pre><code>$dbh-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$name = &quot;Twei&quot;;
+$sql = &apos;SELECT * FROM users WHERE name =:name&apos;;
+$stmt = $dbh-&gt;prepare($sql);
+$stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+$stmt-&gt;execute();
+$code = $stmt-&gt;errorCode();
+// var_dump($code);echo &apos;&lt;br&gt;&apos;;
+if (empty($code)) {
+    while ($row = $stmt-&gt;fetchObject()) {
+        echo $row[&apos;id&apos;],&quot;\t&quot;,$row[&apos;name&apos;],&quot;\t&quot;,$row[&apos;score&apos;],&quot;&lt;br&gt;&quot;;
+    }
+}else{
+    echo &apos;Error occurred when execut SQL &apos;, $sql, &apos;&lt;br&gt;&apos;;
+    echo &apos;ErrorInfo:&lt;br&gt;&lt;pre&gt;&apos;;
+    var_dump($stmt-&gt;errorInfo());
+}
+</code></pre><p>执行结果如下：</p>
+<pre><code>Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table &apos;pdo_test.users&apos; doesn&apos;t exist in D:\web\www\Algorithm\test.php on line 60
+Error occurred when execut SQL SELECT * FROM users WHERE name =:name
+ErrorInfo:
+array(3) {
+  [0]=&gt;
+  string(5) &quot;42S02&quot;
+  [1]=&gt;
+  int(1146)
+  [2]=&gt;
+  string(36) &quot;Table &apos;pdo_test.users&apos; doesn&apos;t exist&quot;
+}
+</code></pre><p>与SILENT模式相比，多了一个Warning。</p>
+<p><strong>POD::ERRMODE_EXCEPTION</strong></p>
+<p>在这个模式下，出错会产生一个PHP的错误（PDOException），同时也会设置Statement级别的errorinfo。不过这个时候，我们就可以通过<code>try{...}catch{...}</code>的方式来捕获产生的异常。</p>
+<pre><code>$dbh-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$name = &apos;Twei&apos;;
+try {
+    $sql = &apos;SELECT * FROM users WHERE name =:name&apos;;
+    $stmt = $dbh-&gt;prepare($sql);
+    $stmt-&gt;bindParam(&apos;:name&apos;, $name, PDO::PARAM_STR);
+    $stmt-&gt;execute();
+    while ($row = $stmt-&gt;fetchObject()) {
+        echo $row[&apos;id&apos;],&quot;\t&quot;,$row[&apos;name&apos;],&quot;\t&quot;,$row[&apos;score&apos;],&quot;&lt;br&gt;&quot;;
+    }
+}catch(PDOException $e) {
+    echo &apos;PDO Exception Caught.&lt;br&gt;&apos;;
+    echo &apos;Error occurred with executed SQL: &apos;,$sql,&apos;&lt;br&gt;&apos;;
+    echo &apos;Error: &apos;, $e-&gt;getMessage(), &apos;&lt;br&gt;&apos;;
+    echo &apos;Code: &apos;, $e-&gt;getCode(), &apos;&lt;br&gt;&apos;;
+    echo &apos;File: &apos;, $e-&gt;getFile(), &apos;&lt;br&gt;&apos;;
+    echo &apos;Line: &apos;, $e-&gt;getLine(), &apos;&lt;br&gt;&apos;;
+    echo &apos;Trace: &apos;, $e-&gt;getTraceAsString(), &apos;&lt;br&gt;&apos;;
+}
+</code></pre><p>执行结果：</p>
+<pre><code>PDO Exception Caught.
+Error occurred with executed SQL: SELECT * FROM users WHERE name =:name
+Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table &apos;pdo_test.users&apos; doesn&apos;t exist
+Code: 42S02
+File: D:\web\www\test.php
+Line: 80
+Trace: #0 D:\web\www\test.php(80): PDOStatement-&gt;execute() #1 {main}
+</code></pre><p>通过<code>try{...}catch{...}</code>的方式，可以捕获<code>execute</code>时产生的异常，可以跟踪到文件和行数级别。</p>
+<h3 id="防止SQL注入"><a href="#防止SQL注入" class="headerlink" title="防止SQL注入"></a>防止SQL注入</h3><p>SQL注入就是攻击者在用户输入的地方输入SQL语句从而导致该语句在数据库中执行。避免SQL注入的准则就是：<strong>在外部数据到达数据库之前对它进行转义。</strong></p>
+<ol>
+<li>query方式不能自动转义，需要手动调用<code>$dbh-&gt;quote</code>方法来转义；</li>
+<li>预编译的方法基本可以避免SQL注入；</li>
+</ol>
+<p>原理如下：当调用<code>prepare()</code>时，查询语句已经发送给了数据库服务器，此时只有占位符 发送过去，没有用户提交的数据；当调用到<code>execute()</code>时，用户提交过来的值才会传送给数据库，它们是分开传送的，所以不会产生SQL注入的风险。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://php.net/manual/zh/book.pdo.php" target="_blank" rel="noopener">PHP 数据对象</a></p>
+<p><a href="http://blog.csdn.net/qq_28602957/article/details/51004241" target="_blank" rel="noopener">PDO防止sql注入的机制</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/09/25/PHP使用PDO访问数据库/" data-id="cjecyyu81003g4cvncfwfpust" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/09/25/MySQL允许远程访问/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          MySQL允许远程访问
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/09/24/PHP创建空对象/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">PHP创建空对象</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

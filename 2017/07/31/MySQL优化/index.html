@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MySQL优化 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言接触MySQL也挺长时间了，但基本停留在使用的层面，这里就稍微深入地探讨一下MySQL优化方面的知识。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL优化">
+<meta property="og:url" content="http://yoursite.com/2017/07/31/MySQL优化/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言接触MySQL也挺长时间了，但基本停留在使用的层面，这里就稍微深入地探讨一下MySQL优化方面的知识。">
+<meta property="og:updated_time" content="2017-10-08T11:56:45.715Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL优化">
+<meta name="twitter:description" content="前言接触MySQL也挺长时间了，但基本停留在使用的层面，这里就稍微深入地探讨一下MySQL优化方面的知识。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-MySQL优化" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/31/MySQL优化/" class="article-date">
+  <time datetime="2017-07-31T14:37:32.000Z" itemprop="datePublished">2017-07-31</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL优化
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>接触MySQL也挺长时间了，但基本停留在使用的层面，这里就稍微深入地探讨一下MySQL优化方面的知识。</p>
+<a id="more"></a>
+<p>MySQL优化的原则有这几个方面：减少系统的瓶颈、减少资源的占用、加快系统的响应速度。</p>
+<p>例如，通过优化文件系统，提高磁盘I/O的读写速度；通过优化操作系统调度策略，提高MySQL在高负荷情况下的负载能力；通过调整表结构和查询语句、增加索引等提高系统响应速度。</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>个人认为MySQL的优化可以分成3个方面：数据库设计和结构优化、MySQL服务器和配置优化、查询优化。</p>
+<p>其中，索引的使用是查询中很重要的一个方面，所以我把它单独列出来作为一个优化项。</p>
+<p>下面从这个4个方面来说一下MySQL中常用的优化方法。</p>
+<h3 id="MySQL服务器和配置优化"><a href="#MySQL服务器和配置优化" class="headerlink" title="MySQL服务器和配置优化"></a>MySQL服务器和配置优化</h3><h4 id="硬件"><a href="#硬件" class="headerlink" title="硬件"></a>硬件</h4><ul>
+<li>配置较大的内存</li>
+</ul>
+<p>内存的速度要比磁盘I/O快得多，所以可以给MySQL配置较大的内存，增加缓冲区的容量，让更多的查询结果尽可能长时间地停留在内存中，从而减少磁盘I/O。</p>
+<ul>
+<li>选择高速磁盘系统</li>
+</ul>
+<p>更快的转速、RAID、阵列卡等，减少读盘的等待时间，提高响应速度。</p>
+<ul>
+<li>合理分布磁盘I/O</li>
+</ul>
+<p>将磁盘I/O分散在多个设备上，以减少资源竞争，提高并行操作能力。</p>
+<ul>
+<li>选择多处理器系统</li>
+</ul>
+<p>选择多核CPU、主频高的CPU，MySQL是多线程的数据库，多个CPU可以同时执行多个线程。</p>
+<ul>
+<li>网络环境选择</li>
+</ul>
+<p>尽量部署在局域网、SCI、光缆、千兆网、双网线提供冗余、0.0.0.0多端口绑定监听。</p>
+<h4 id="操作系统内核（不太理解）"><a href="#操作系统内核（不太理解）" class="headerlink" title="操作系统内核（不太理解）"></a>操作系统内核（不太理解）</h4><ul>
+<li>使用64位的操作系统，更好地使用大内存；</li>
+<li>设置noatimenodiratime；</li>
+<li>优化内核参数；</li>
+<li>加大文件描述符限制；</li>
+<li>文件系统选择 xfs；</li>
+</ul>
+<h4 id="MySQL参数配置"><a href="#MySQL参数配置" class="headerlink" title="MySQL参数配置"></a>MySQL参数配置</h4><p>MySQL的配置参数都在my.ini或则my.cnf文件中。</p>
+<p>一些对性能影响较大的参数如下所示，包括I/O处理的常用参数；最大连接数设置；缓存使用参数的设置；慢日志的参数的设置；InnoDB相关参数的设置等。</p>
+<pre><code>key_buffer_size
+MySQL索引缓冲区的大小。如果是采用MyISAM的话要重点设置这个参数，根据（key_reads/key_read_requests）判断
+
+max_connections
+服务器允许的最大连接数，尽量不要设置太大，因为设置太大的话容易导致内存溢出
+
+wait_timeout
+线程连接的超时时间，尽量不要设置很大，推荐10s
+
+thread_concurrency
+线程并发利用数量，(cpu+disk)*2，根据(os中显示的请求队列和tickets)判断
+
+sort_buffer_size
+排序缓冲区的大小。该值越大，进行排序的速度越快
+
+read_rnd_buffer_size
+当根据键进行分类操作时获得更快的--ORDER BY
+
+join_buffer_size
+join连接使用全表扫描连接的缓冲大小，根据select_full_join判断
+
+read_buffer_size
+全表扫描时为查询预留的缓冲大小，根据select_scan判断
+
+tmp_table_size
+临时内存表的设置，如果超过设置就会转化成磁盘表，根据参数(created_tmp_disk_tables)判断
+
+innodb_buffer_pool_size
+InnoDB表数据和索引的最大缓存。根据（hit riatos和FILE I/O）判断
+
+innodb_log_file_size(默认5M)
+InnoDB引擎的redo log文件，设置较大的值意味着较长的恢复时间
+
+innodb_flush_log_at_trx_commit(默认1)
+表示何时将缓冲区数据写入日志，并将日志文件写入磁盘。
+1. 0表示每秒进行一次log写入cache，并flush log到磁盘；
+2. 1表示在每次事务提交后执行log写入cache，并flush log到磁盘；
+3. 2表示在每次事务提交后执行log写入cache，每秒执行一次flush log到磁盘；
+</code></pre><h3 id="数据库设计和结构优化"><a href="#数据库设计和结构优化" class="headerlink" title="数据库设计和结构优化"></a>数据库设计和结构优化</h3><h4 id="数据表尽量符合范式"><a href="#数据表尽量符合范式" class="headerlink" title="数据表尽量符合范式"></a>数据表尽量符合范式</h4><ul>
+<li>1NF：表的列的具有原子性，不可再分解，即列的信息，不能分解成为更小的数据项；</li>
+<li>2NF：表中的记录是唯一的，通常通过设计一个主键来实现；</li>
+<li>3NF：表中不要有冗余数据，也就是说，如果某个字段能够被其它字段推导出来，就不应该存在；</li>
+</ul>
+<p>当然，没有冗余的数据库未必是最好的，有时为了提高运行效率，就必须降低范式标准，适当保留冗余数据。</p>
+<h4 id="合理选择存储引擎"><a href="#合理选择存储引擎" class="headerlink" title="合理选择存储引擎"></a>合理选择存储引擎</h4><p>在开发中，经常使用的存储引擎有MyISAM/InnoDB/Memory。</p>
+<p>MyISAM： 数据库并发不大，读多写少，sql 语句比较简单，对事务要求不高，比如 bbs 中的发帖表，回复表；</p>
+<p>InnoDB：并发访问大，写操作比较多，有外键、事务等需求的应用，系统内存较大。比如订单表，账号表；</p>
+<p>Memory：数据不需要入库，同时又频繁的查询和修改，速度极快；</p>
+<h4 id="字段数据类型选择"><a href="#字段数据类型选择" class="headerlink" title="字段数据类型选择"></a>字段数据类型选择</h4><p>字段数据类型的选择的一般原则：</p>
+<ul>
+<li>根据需求选择合适的字段类型，在满足需求的情况下字段类型尽可能小；</li>
+<li>只分配满足需求的最小字符数，不要太慷慨；</li>
+</ul>
+<p>原因：更小的字段类型更小的字符数占用更少的内存，占用更少的磁盘空间，占用更少的磁盘 IO 以及占用更少的带宽。</p>
+<h4 id="CHAR-和-VARCHAR-的选取"><a href="#CHAR-和-VARCHAR-的选取" class="headerlink" title="CHAR 和 VARCHAR 的选取"></a>CHAR 和 VARCHAR 的选取</h4><p>它们的区别在于：CHAR(M) 类型的数据列里，每个值都占用 M 个字节，如果某个长度小于 M，MySQL 就会在它的右边用空格字符补足；VARCHAR(M) 类型的数据列里，每个值只占用刚好够用的字节再加上一个用来记录其长度的字节（即总长度为 L+1 字节）。 </p>
+<p>二者的选取主要依据如下原则:</p>
+<ol>
+<li>如果列数据项的大小一致或者相差不大，则使用 CHAR；</li>
+<li>如果列数据项的大小差异相当大，则使用 VARCHAR；</li>
+<li>对于 MyISAM 表，尽量使用 CHAR。 因为 VARCHAR 类型随着修改容易造成磁盘碎片，使用 CHAR 的缺点就是占用磁盘空间；</li>
+<li>对于 InnoDB 表，从减少空间占用量和减少磁盘 I/O 的角度，使用 VARCHAR;</li>
+<li>表中只要存在一个 VARCHAR 类型的字段，那么所有的 CHAR 字段都会自动变成 VARCHAR 类型，因此建议定长和变长的数据分开。</li>
+</ol>
+<h4 id="编码选择"><a href="#编码选择" class="headerlink" title="编码选择"></a>编码选择</h4><ul>
+<li>单字节 latin1</li>
+<li>多字节 utf8 (汉字占 3 个字节，英文字母占用一个字节)</li>
+</ul>
+<p>如果含有中文字符的话最好都统一采用 utf8 类型，避免乱码的情况发生。</p>
+<h4 id="NULL-OR-NOT-NULL"><a href="#NULL-OR-NOT-NULL" class="headerlink" title="NULL OR NOT NULL"></a>NULL OR NOT NULL</h4><p>尽可能设置每个字段为 NOT NULL，除非有特殊的需求，原因如下：</p>
+<ol>
+<li>使用含有 NULL 列做索引的话会占用更多的磁盘空间，因为索引 NULL 列需要而外的空间来保存；</li>
+<li>进行比较的时候，程序会更复杂；</li>
+<li>含有 NULL 的列 SQL 难优化，如果是一个组合索引，那么这个 NULL 类型的字段会极大影响整个索引的效率。</li>
+</ol>
+<h4 id="读写分离"><a href="#读写分离" class="headerlink" title="读写分离"></a>读写分离</h4><p>开启 MySQL 复制，实现读写分离、负载均衡，将读的负载分摊到多个从服务器上，提高服务器的处理能力。</p>
+<h4 id="分表和分区"><a href="#分表和分区" class="headerlink" title="分表和分区"></a>分表和分区</h4><p>当表存储了百万级乃至千万级条记录时，在查询和插入的时候耗时太长，性能低下，如果涉及联合查询的情况，性能会更加糟糕。</p>
+<p>分表和分区的目的就是减少数据库的负担，提高数据库的效率。</p>
+<p>分表可以分成水平拆分和垂直拆分两种，水平拆分就是将一张大表拆分成多张小表，每张小表的结构与原表相同，只是记录条数要少；垂直拆分就是将大表中的某些字段（使用频率低）取出来，放在另一张表中。</p>
+<h3 id="查询优化"><a href="#查询优化" class="headerlink" title="查询优化"></a>查询优化</h3><h4 id="COUNT"><a href="#COUNT" class="headerlink" title="COUNT(*)"></a>COUNT(*)</h4><p>在 MyISAM 下没关系，但尽量不在 InnoDB 下使用。</p>
+<p>如果要在 InnoDB下使用，建议另外弄一张统计表，采用 MyISAM，定期做统计。一般的对统计的数据不会要求太精准的情况下适用。</p>
+<h4 id="尽量不在SQL中做计算"><a href="#尽量不在SQL中做计算" class="headerlink" title="尽量不在SQL中做计算"></a>尽量不在SQL中做计算</h4><p>Mysql 的作用是用来存取数据的，不是做计算的。 在 SQL 中做计算很耗资源，尽量取出数据在其它地方做计算。</p>
+<h4 id="尽量避免-SELECT"><a href="#尽量避免-SELECT" class="headerlink" title="尽量避免 SELECT *"></a>尽量避免 SELECT *</h4><p>用哪些字段就取哪些字段。在访问量大或者记录中某个字段数据量大时，<code>SELECT *</code> 在执行效率、IO 资源以及网络带宽方面，会造成严重的浪费。</p>
+<h4 id="用连接-JOIN-代替子查询"><a href="#用连接-JOIN-代替子查询" class="headerlink" title="用连接 JOIN 代替子查询"></a>用连接 JOIN 代替子查询</h4><p>因为使用 join，不需要在内存中创建临时表。</p>
+<h4 id="已知查询行数时用-LIMIT"><a href="#已知查询行数时用-LIMIT" class="headerlink" title="已知查询行数时用 LIMIT"></a>已知查询行数时用 LIMIT</h4><p>查询尽可能使用 LIMIT 减少返回的行数，减少数据传输时间和带宽浪费。</p>
+<h4 id="避免隐式类型转换"><a href="#避免隐式类型转换" class="headerlink" title="避免隐式类型转换"></a>避免隐式类型转换</h4><p>例如字符型一定要用引号括起来，数字型一定不要使用引号，如： <code>SELECT score FROM student WHERE name = &#39;twei&#39; AND id = 5;</code></p>
+<h4 id="SQL-关键词大写"><a href="#SQL-关键词大写" class="headerlink" title="SQL 关键词大写"></a>SQL 关键词大写</h4><p>所有的 SQL 关键词用大写，养成良好的习惯，避免 SQL 语句重复编译造成系统资源的浪费。</p>
+<h4 id="开启慢查询"><a href="#开启慢查询" class="headerlink" title="开启慢查询"></a>开启慢查询</h4><p>开启慢查询，定期用 EXPLAIN 优化慢查询中的 SQL 语句。</p>
+<h4 id="ANALYZE、CHECK、OPTIMIZE"><a href="#ANALYZE、CHECK、OPTIMIZE" class="headerlink" title="ANALYZE、CHECK、OPTIMIZE"></a>ANALYZE、CHECK、OPTIMIZE</h4><p>经常用 <code>ANALYZE TABLE</code> 和 <code>CHECK TABLE</code> 来分析和检查表，用 <code>OPTIMIZE TABLE</code> 来整理碎片。</p>
+<h4 id="增加中间表"><a href="#增加中间表" class="headerlink" title="增加中间表"></a>增加中间表</h4><p>对于经常要做联合查询的表，可以增加一张中间表，存放联合查询的数据，牺牲存储空间加快查询速度。</p>
+<h4 id="优化插入数据（INSERT）"><a href="#优化插入数据（INSERT）" class="headerlink" title="优化插入数据（INSERT）"></a>优化插入数据（INSERT）</h4><p>在插入数据时，可以通过以下几种方式来提高插入速度：</p>
+<ul>
+<li>禁用索引</li>
+</ul>
+<p>在插入数据时，MySQL会同时更新表的数据和索引。如果插入大量数据，建立索引会降低插入速度。所以，可以在插入数据前关闭索引，插入完成后再开启索引。</p>
+<p>关闭索引的语句如下：<code>ALTER TABLE table_name DISABLE KEYS</code><br>打开索引的语句如下：<code>ALTER TABLE table_name ENABLE KEYS</code></p>
+<ul>
+<li>禁用唯一性检验</li>
+</ul>
+<p>在插入数据时，MySQL也会进行唯一性检查。与索引一样，唯一性检验也会降低插入速度。可以在插入前关闭，然后再插入后打开。</p>
+<p>禁用唯一性检验的语句如下：<code>SET UNIQUE_CHECKS=0</code><br>开启唯一性检验的语句如下：<code>SET UNIQUE_CHECKS=1</code></p>
+<ul>
+<li>使用批量插入</li>
+</ul>
+<p>批量插入的速度要比逐条插入快。</p>
+<pre><code>INSERT INTO table_name VALUES (1, a, 80),(2, b, 90),(3, c, 34);
+</code></pre><p>的速度要快于下面这三句的执行速度:</p>
+<pre><code>INSERT INTO table_name VALUES (1, a, 80);
+INSERT INTO table_name VALUES (2, b, 90);
+INSERT INTO table_name VALUES (3, c, 34);
+</code></pre><h3 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h3><p>MySQL 中最常用到的优化方式就是添加索引，在需要查询的字段上添加索引可以大大加快查询的速度。索引采用 B-TREE，HASH，R-TREE 等数据结构，本质上就是记录着字段值和存储位置对应关系的文件，利用它可以很快地找字段为特定值的记录所在的位置，而不需要扫描整个数据表。</p>
+<p>MySQL 中的索引有以下几种：主键索引，唯一索引，全文索引，普通索引，组合索引。</p>
+<p>通过 <code>EXPLAIN</code> 指令查看该 SQL 语句中的索引使用情况。</p>
+<h4 id="适合创建索引的字段"><a href="#适合创建索引的字段" class="headerlink" title="适合创建索引的字段"></a>适合创建索引的字段</h4><ul>
+<li>在 WHERE 和 ORDER BY 条件中出现；</li>
+<li>该字段的内容不是唯一的几个值（sex）； </li>
+<li>该字段内容不是频繁变化；</li>
+</ul>
+<h4 id="为多个查询字段添加组合索引"><a href="#为多个查询字段添加组合索引" class="headerlink" title="为多个查询字段添加组合索引"></a>为多个查询字段添加组合索引</h4><p>例如，经常选择满足某时间 time 和某地点 city 的记录时，在 time 和 city 上添加组合索引。</p>
+<h4 id="尽量使用短索引"><a href="#尽量使用短索引" class="headerlink" title="尽量使用短索引"></a>尽量使用短索引</h4><p>对字符串字段添加索引时，如果可能应该指定一个索引长度。短索引不仅可以提高查询速度而且可以节省磁盘空间和 I/O 操作。</p>
+<p>例如，如果有一个 CHAR(255) 的列，如果在前 10 个或 20 个字符内，多数值是惟一的，那么就不要对整个列进行索引。</p>
+<h4 id="索引失效"><a href="#索引失效" class="headerlink" title="索引失效"></a>索引失效</h4><p>一些会导致索引失效的操作：</p>
+<ul>
+<li>LIKE 和 ERGEXP，在搜索模板的第一个字符是通配符时，如 <code>LIKE &quot;%aaa%&quot;</code> 不会使用索引，而 <code>like &quot;aaa%&quot;</code> 会使用索引；</li>
+<li>WHERE 子句的查询条件里有不等号 != 或 &lt;&gt;，如 <code>WHERE column != xxx</code>；</li>
+<li>WHERE 子句的查询条件里有 or，如 <code>WHERE column1 = xxx or column2 = xxx</code>，此时可以采用 <code></code>union all` 来替代；</li>
+<li>WHERE 子句的查询条件里使用了函数，如 <code>WHERE DAY(column) = xxx</code>；</li>
+<li>WHERE 子句中对字段进行 NULL 值判断，如 <code>WHERE num IS NULL;</code></li>
+<li>WHERE 子句的查询条件里有 in 或 not in，如 <code>WHERE id IN (1,2,3);</code>，此时用 between 代替；</li>
+<li>如果使用复合索引，那么必须使用到该索引中的第一个字段作为条件时才能保证系统使用该索引，否则该索引将不会被使用，并且应尽可能地让字段顺序与索引顺序相一致；</li>
+<li>JOIN 操作中，主键和外键的数据类型不同；</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.chinaunix.net/uid-20639775-id-3154234.html" target="_blank" rel="noopener">Mysql数据库优化总结</a></p>
+<p>硬件和操作系统方面的优化主要来自这篇博客，但是不理解的地方居多。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/31/MySQL优化/" data-id="cjecyyu6q00294cvnhzk7izg0" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/02/大数相加、相乘/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          大数相加、相乘
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/30/正则基本知识/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">正则基本知识</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

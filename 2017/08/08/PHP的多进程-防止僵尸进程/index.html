@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP的多进程--防止僵尸进程 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+<meta name="keywords" content="PHP,进程,pcntl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP的多进程--防止僵尸进程">
+<meta property="og:url" content="http://yoursite.com/2017/08/08/PHP的多进程-防止僵尸进程/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/pcntl/zombine.png">
+<meta property="og:updated_time" content="2017-08-18T12:06:31.328Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP的多进程--防止僵尸进程">
+<meta name="twitter:description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/pcntl/zombine.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP的多进程-防止僵尸进程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/08/PHP的多进程-防止僵尸进程/" class="article-date">
+  <time datetime="2017-08-08T06:55:27.000Z" itemprop="datePublished">2017-08-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础教程/">基础教程</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP的多进程--防止僵尸进程
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。</p>
+<p>我的邮箱是: <a href="mailto:tjutwei@163.com" target="_blank" rel="noopener">tjutwei@163.com</a>，欢迎各位来信讨论相关问题。</p>
+<a id="more"></a>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="">PHP的多进程–基础介绍</a></p>
+<p><a href="">PHP的多进程–防止僵尸进程</a></p>
+<p><a href="">PHP的多进程–共享数据</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>多进程编码中，一个不得不注意的问题就是僵尸进程（zombie process）。在 PHP 的多进程编码中，也是如此。</p>
+<h3 id="什么是僵尸进程"><a href="#什么是僵尸进程" class="headerlink" title="什么是僵尸进程"></a>什么是僵尸进程</h3><p>僵尸进程：一个进程使用 fork 创建子进程，如果子进程退出，而父进程并没有调用 wait() 或 waitpid() 获取子进程的状态信息，那么子进程的进程描述符仍然保存在系统中，这类子进程被称为僵尸进程。</p>
+<p>我们详细理解下，在 UNIX/Linux 中，正常情况下，子进程是通过 fork 父进程创建的。子进程和父进程的运行是一个<strong>异步</strong>过程，理论上父进程无法知道子进程的运行状态。</p>
+<p>但知道子进程运行状态是一个很合理的需求，所以 UNIX 提供了一种机制可以保证只要父进程想知道子进程结束时的状态信息，就可以得到。</p>
+<p>这种机制就是: 在每个进程退出的时候，内核释放该进程的一部分资源，包括打开的文件、占用的内存等，同时仍然为其保留一定的信息（包括进程号 the process ID，退出状态 the termination status of the process，运行时间 the amount of CPU time taken by the process等）。父进程可以通过 wait()/waitpid() 来获取这些信息，然后操作系统才释放。 </p>
+<p>这样就产生了一个问题，如果父进程不调用 wait()/waitpid() 的话，那么保留的信息就不会释放，其进程号就会一直被占用，就像僵尸一样，所以把这些进程称为僵尸进程。</p>
+<h3 id="僵尸进程的坏处"><a href="#僵尸进程的坏处" class="headerlink" title="僵尸进程的坏处"></a>僵尸进程的坏处</h3><p>上面说到僵尸进程由于父进程不回收系统保留的信息而一直占用着系统资源，其中有一项叫做进程描述符。系统通过分配它来启动一个进程。</p>
+<p>但是系统所能使用的进程号是有限的，如果存在大量的僵尸进程，系统将因为没有可用的进程号而导致系统不能产生新的进程。</p>
+<h3 id="如何查看僵尸进程"><a href="#如何查看僵尸进程" class="headerlink" title="如何查看僵尸进程"></a>如何查看僵尸进程</h3><p>僵尸进程在系统中用 <code>&lt;defunct&gt;</code> 或 <code>&lt;z&gt;</code> 表示，通过 <code>ps -ef</code> 指令查看进程，如果发现某个进程的状态为 <code>&lt;defunct&gt;/&lt;z&gt;</code>，说明该进程是一个僵尸进程。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/pcntl/zombine.png" alt=""></p>
+<h3 id="避免僵尸进程的方法"><a href="#避免僵尸进程的方法" class="headerlink" title="避免僵尸进程的方法"></a>避免僵尸进程的方法</h3><h4 id="通过wait-waitpid系统"><a href="#通过wait-waitpid系统" class="headerlink" title="通过wait/waitpid系统"></a>通过wait/waitpid系统</h4><p>在 pcntl 中，父进程可以通过 pcntl_wait() 和 pcntl_waitpid() 函数来等待子进程结束，并回收。</p>
+<pre><code>&lt;?php
+$pid = pcntl_fork();
+
+if($pid == -1) {
+    die(&apos;fork error&apos;);
+}elseif($pid) {    
+    // 父进程阻塞着等待子进程的退出
+    pcntl_wait($status);
+    //pcntl_waitpid($pid, $status);
+
+    // 非阻塞方式，通过WNOHANG区分
+    //pcntl_wait($status, WNOHANG);
+    //pcntl_waitpid($pid, $status, WNOHANG);
+
+    // 如没有上面的函数，在父进程sleep的时候，子进程就是僵尸进程
+    sleep(10);
+}else{
+    echo &quot;child \r\n&quot;;
+    exit;
+}
+?&gt;
+</code></pre><p>int pcntl_wait ( int &amp;$status [, int $options ] )：阻塞当前进程，直到当前进程的一个子进程退出或者收到一个结束当前进程的信号。</p>
+<p>int pcntl_waitpid ( int $pid , int &amp;$status [, int $options ] )：功能同 pcntl_wait，区别为 waitpid 为等待指定 pid 的子进程。当 pid 为 -1 时 pcntl_waitpid 与 pcntl_wait 一样。</p>
+<blockquote>
+<p>阻塞：父进程一直等待，直到收到一个子进程结束的信号再执行；</p>
+<p>非阻塞：父进程和子进程同时执行，不用等子进程执行完。在子进程退出后，再回收。</p>
+</blockquote>
+<h4 id="通过SIGCHLD信号"><a href="#通过SIGCHLD信号" class="headerlink" title="通过SIGCHLD信号"></a>通过SIGCHLD信号</h4><p>当子进程结束后，系统会像父进程发送 SIGCHLD 信号给父进程，通知父进程子进程已经结束，但父进程默认不处理。我们可以在父进程收到这个信号时调用 wait()/waitpid() 来回收。</p>
+<pre><code>&lt;?php
+// 每执行一次低级语句会检查一次该进程是否有未处理过的信号
+declare(ticks = 1);
+
+// 信号处理函数
+function sig_func() {
+    echo &quot;SIGCHLD \r\n&quot;;
+
+    // 阻塞
+    pcntl_wait($status);
+    //pcntl_waitpid(-1, $status);
+
+    // 非阻塞
+    //pcntl_wait($status, WNOHANG);
+    //pcntl_waitpid(-1, $status, WNOHANG);
+}
+
+pcntl_signal(SIGCHLD, &apos;sig_func&apos;);
+
+$pid = pcntl_fork();
+
+if($pid == -1) {
+    die(&apos;fork error&apos;);
+}elseif($pid) {
+    // 父进程一直执行
+    while(1) {
+        sleep(5);
+    }
+}else{
+    echo &quot;child \r\n&quot;;
+    exit;
+}
+</code></pre><p>在子进程退出后，父进程收到了 SIGCHLD 信号，回调了 sig_func 函数，在内部执行了 pcntl_wait 函数，回收了子进程。</p>
+<h4 id="通过操作系统信号"><a href="#通过操作系统信号" class="headerlink" title="通过操作系统信号"></a>通过操作系统信号</h4><p>如果父进程不关心子进程什么时候结束，那么可以用 <code>pcntl_signal(SIGCHLD, SIG_IGN)</code> 通知内核，自己对子进程的结束不感兴趣，那么子进程结束后，内核会回收，并不再给父进程发送信号。</p>
+<pre><code>&lt;?php
+declare(ticks = 1);
+
+pcntl_signal(SIGCHLD, SIG_IGN);
+
+$pid = pcntl_fork();
+
+if($pid == -1) {
+    die(&apos;fork error&apos;);
+} else if ($pid) {
+    for(;;) {
+        sleep(3);
+    }
+} else {
+    echo &quot;child \r\n&quot;;
+    exit;
+}
+</code></pre><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.cnblogs.com/Anker/p/3271773.html" target="_blank" rel="noopener">孤儿进程与僵尸进程[总结]</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/08/PHP的多进程-防止僵尸进程/" data-id="cjecyyu9c00554cvni4bpuz9n" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/进程/">进程</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/08/PHP的多进程-共享数据/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP的多进程--共享数据
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/08/PHP的多进程-基础介绍/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">PHP的多进程--基础介绍</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

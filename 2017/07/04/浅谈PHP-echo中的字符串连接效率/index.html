@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>浅谈PHP echo中的字符串连接效率 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言在之前遇到的一个PHP代码优化问题中，出现了这样一个说法，在 echo 中，用 , 代替 . 会节省 echo 输出的时间。 这里索性对PHP echo 中的字符串连接效率问题做一下研究和总结。">
+<meta name="keywords" content="PHP,echo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈PHP echo中的字符串连接效率">
+<meta property="og:url" content="http://yoursite.com/2017/07/04/浅谈PHP-echo中的字符串连接效率/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言在之前遇到的一个PHP代码优化问题中，出现了这样一个说法，在 echo 中，用 , 代替 . 会节省 echo 输出的时间。 这里索性对PHP echo 中的字符串连接效率问题做一下研究和总结。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/echo/data.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/echo/table.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/echo/opcodes.png">
+<meta property="og:updated_time" content="2017-07-04T07:37:22.338Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈PHP echo中的字符串连接效率">
+<meta name="twitter:description" content="前言在之前遇到的一个PHP代码优化问题中，出现了这样一个说法，在 echo 中，用 , 代替 . 会节省 echo 输出的时间。 这里索性对PHP echo 中的字符串连接效率问题做一下研究和总结。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/echo/data.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-浅谈PHP-echo中的字符串连接效率" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/04/浅谈PHP-echo中的字符串连接效率/" class="article-date">
+  <time datetime="2017-07-04T03:23:20.000Z" itemprop="datePublished">2017-07-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      浅谈PHP echo中的字符串连接效率
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在之前遇到的一个PHP代码优化问题中，出现了这样一个说法，在 <code>echo</code> 中，用 <code>,</code> 代替 <code>.</code> 会节省 <code>echo</code> 输出的时间。</p>
+<p>这里索性对PHP <code>echo</code> 中的字符串连接效率问题做一下研究和总结。</p>
+<a id="more"></a>
+<h2 id="echo连接方式"><a href="#echo连接方式" class="headerlink" title="echo连接方式"></a>echo连接方式</h2><p>目的是将变量嵌入到字符串中，所以出现了字符串连接的问题，可以使用的方式有以下几种：</p>
+<h3 id="双引号解析变量"><a href="#双引号解析变量" class="headerlink" title="双引号解析变量"></a>双引号解析变量</h3><pre><code>function test_1 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &quot;Hello $user welcome on my website&quot;;
+}  
+</code></pre><h3 id="双引号解析变量，通过-来定位变量"><a href="#双引号解析变量，通过-来定位变量" class="headerlink" title="双引号解析变量，通过 {} 来定位变量"></a>双引号解析变量，通过 <code>{}</code> 来定位变量</h3><pre><code>function test_2 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &quot;Hello {$user} welcome on my website.&quot;;
+}
+</code></pre><h3 id="双引号，通过-连接字符串和变量"><a href="#双引号，通过-连接字符串和变量" class="headerlink" title="双引号，通过 . 连接字符串和变量"></a>双引号，通过 . 连接字符串和变量</h3><pre><code>function test_3 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &quot;Hello &quot;.$user.&quot; welcome on my website.&quot;;
+}
+</code></pre><h3 id="单引号，通过-连接字符串和变量"><a href="#单引号，通过-连接字符串和变量" class="headerlink" title="单引号，通过 . 连接字符串和变量"></a>单引号，通过 . 连接字符串和变量</h3><pre><code>function test_4 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &apos;Hello &apos;.$user.&apos; welcome on my website.&apos;;
+}
+</code></pre><h3 id="双引号，通过-连接字符串和变量-1"><a href="#双引号，通过-连接字符串和变量-1" class="headerlink" title="双引号，通过 , 连接字符串和变量"></a>双引号，通过 , 连接字符串和变量</h3><pre><code>function test_5 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &quot;Hello &quot;, $user, &quot; welcome on my website.&quot;;
+}
+</code></pre><h3 id="单引号，通过-连接字符串和变量-1"><a href="#单引号，通过-连接字符串和变量-1" class="headerlink" title="单引号，通过 , 连接字符串和变量"></a>单引号，通过 , 连接字符串和变量</h3><pre><code>function test_6 () {
+    $user = &apos;Dandelion_Miss&apos;;
+    echo &apos;Hello &apos;, $user, &apos; welcome on my website.&apos;;
+}
+</code></pre><h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>在 Win7 (64)和 PHP 7 的环境下测试了上面的6种连接字符串的方法，循环执行每个函数，并记录运行时间。以下是测试结果：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/echo/data.png" alt=""></p>
+<p>1到6行代表上面的每个连接方法，列数表示循环执行次数，第一列为5000次，第二列为10000次，第三列为50000次，时间的单位是秒(s)。每一列都是重复了5次，取的平均值。</p>
+<p>下面是将数据用条形图表示的结果：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/echo/table.png" alt=""></p>
+<p>从图中可以得出这样几个结论：</p>
+<ul>
+<li><p>不管什么时候，方法2（双引号解析变量，通过 <code>{}</code> 来定位变量）都要比方法1（双引号解析变量）快；</p>
+</li>
+<li><p>循环次数小的时候，方法4（单引号，通过 . 连接字符串和变量）相对而言是最慢的；</p>
+</li>
+<li><p>随着循环次数的增加，方法1（双引号解析变量）的效率越来越低；</p>
+</li>
+<li><p>使用单引号 <strong>‘</strong> 的效率要比双引号 <strong>“</strong> 高；</p>
+</li>
+<li><p>使用逗号 <strong>,</strong> 的效率要比句号 <strong>.</strong> 高，也要比单引号 <strong>‘</strong> 高；</p>
+</li>
+<li><p>循环次数多的时候，方法2（双引号解析变量，通过 <code>{}</code> 来定位变量）是最快的，其次是方法6（单引号，通过 , 连接字符串和变量）；</p>
+</li>
+</ul>
+<p><strong>总结：</strong> </p>
+<ul>
+<li><p>直接通过双引号解析字符串，效率最低，不建议使用；</p>
+</li>
+<li><p>可以通过以下两种方式优化 <code>echo</code> 语句：</p>
+<ul>
+<li>双引号括起整个字符串，通过 <code>{}</code> 定位变量位置</li>
+<li>单引号括起字符串，通过 <strong>,</strong> 连接变量</li>
+</ul>
+</li>
+</ul>
+<p>另外提一句，PHP 7是真的快。</p>
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><h3 id="单引号和双引号的区别"><a href="#单引号和双引号的区别" class="headerlink" title="单引号和双引号的区别"></a>单引号和双引号的区别</h3><p>因为单引号不做变量解析，直接当作字符串输出，而双引号还需要判断在它内部是不是存在要被替换的变量，所以单引号的效率要高于双引号。</p>
+<h3 id="加不加-的区别"><a href="#加不加-的区别" class="headerlink" title="加不加{}的区别"></a>加不加<code>{}</code>的区别</h3><p>通过 <code>{}</code> 可以直接定位变量的位置，不需要在字符串中查找，所以效率也要高。</p>
+<h3 id="和-的区别"><a href="#和-的区别" class="headerlink" title=", 和 . 的区别"></a>, 和 . 的区别</h3><p>PHP手册是这样说的：</p>
+<pre><code>// Strings can either be passed individually as multiple arguments or concatenated together and passed as a single argument
+echo &apos;This &apos;, &apos;string &apos;, &apos;was &apos;, &apos;made &apos;, &apos;with multiple parameters.&apos;, chr(10);
+echo &apos;This &apos; . &apos;string &apos; . &apos;was &apos; . &apos;made &apos; . &apos;with concatenation.&apos; . &quot;\n&quot;;
+</code></pre><p>使用 <code>,</code>是按照多个参数进行处理的，而使用 <code>.</code> 是先进行拼接（concat）然后当做一个整体输出。进行拼接的速度要比直接输出慢。</p>
+<p>我们通过VLD可以直观得看出这一点：</p>
+<p>代码1：</p>
+<pre><code>&lt;?php
+$str = &quot;world&quot;;
+echo &quot;hello &quot; . $str;
+?&gt;
+</code></pre><p>代码2：</p>
+<pre><code>&lt;?php
+$str = &quot;world&quot;;
+echo &quot;hello &quot; , $str;
+?&gt;
+</code></pre><p>VLD分析结果：<br><img src="http://o77tdbi0j.bkt.clouddn.com/image/echo/opcodes.png" alt=""></p>
+<p>可见，代码1在执行完赋值语句之后，执行了 CONCAT 操作，将 <code>hello+</code> 和 <code>!0</code> 拼接起来，存放在临时变量 <code>~2</code> 中；代码2是直接执行两次 ECHO 操作，不需要临时变量，所以要比1快。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>之前在实习的时候，遇到另外一个做PHP的。我代码有一个问题，去请教他，因为是个很弱智的问题，所以很快就调出来了。但是，他没有停在这儿，而是去研究从这个问题引出的另外一个PHP的语法问题。这让我很有感触，一个优秀的程序员不应该只停留在解决眼前的bug上，应该保持好奇心和探究性，不放过任何一个问题。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/04/浅谈PHP-echo中的字符串连接效率/" data-id="cjecyyubi00824cvnh5z2x64e" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/echo/">echo</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/07/百度抓取部署在GitHub-Pages上hexo博客失败的解决方案/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          百度抓取部署在GitHub Pages上hexo博客失败的解决方案
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/04/PHP求职宝典-PHP语言基础/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">PHP求职宝典--PHP语言基础</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

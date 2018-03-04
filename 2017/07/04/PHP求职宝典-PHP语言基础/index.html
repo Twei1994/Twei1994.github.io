@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP求职宝典--PHP语言基础 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言《PHP求职宝典》中的一些面试题，包括Web页面设计、PHP基础、数据库等方面。 这篇是PHP语言基础方面，考察PHP的基本功，包括内置函数、图形控制、文件操作等。">
+<meta name="keywords" content="PHP,PHP求职宝典">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP求职宝典--PHP语言基础">
+<meta property="og:url" content="http://yoursite.com/2017/07/04/PHP求职宝典-PHP语言基础/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言《PHP求职宝典》中的一些面试题，包括Web页面设计、PHP基础、数据库等方面。 这篇是PHP语言基础方面，考察PHP的基本功，包括内置函数、图形控制、文件操作等。">
+<meta property="og:updated_time" content="2017-07-05T07:18:40.915Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP求职宝典--PHP语言基础">
+<meta name="twitter:description" content="前言《PHP求职宝典》中的一些面试题，包括Web页面设计、PHP基础、数据库等方面。 这篇是PHP语言基础方面，考察PHP的基本功，包括内置函数、图形控制、文件操作等。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP求职宝典-PHP语言基础" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/04/PHP求职宝典-PHP语言基础/" class="article-date">
+  <time datetime="2017-07-04T01:45:03.000Z" itemprop="datePublished">2017-07-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/面试/">面试</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP求职宝典--PHP语言基础
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>《PHP求职宝典》中的一些面试题，包括Web页面设计、PHP基础、数据库等方面。</p>
+<p>这篇是PHP语言基础方面，考察PHP的基本功，包括内置函数、图形控制、文件操作等。</p>
+<a id="more"></a>
+<h2 id="PHP语言"><a href="#PHP语言" class="headerlink" title="PHP语言"></a>PHP语言</h2><h3 id="PHP的全称"><a href="#PHP的全称" class="headerlink" title="PHP的全称"></a>PHP的全称</h3><p>PHP是Hypertext Preprocessor（超文本预处理器）的缩写，是服务器端的、跨平台的、HTML嵌入式的脚本语言，尤其适合Web开发。</p>
+<p>反正这个问题我是没被问到过。。。</p>
+<h3 id="优化以下代码"><a href="#优化以下代码" class="headerlink" title="优化以下代码"></a>优化以下代码</h3><pre><code>&lt;?
+echo (&quot;&lt;p&gt;Search results for query: &quot; . $_GET[&apos;query&apos;] . &quot;.&lt;/p&gt;&quot;);
+?&gt;
+</code></pre><p><strong>分析：</strong>首先，它使用了短标签 <code>&lt;? ?&gt;</code>，不符合 XML 规范，所以不建议使用；其次，最大的问题是将用户的输入直接输出，产生了跨站脚本攻击（XSS）的漏洞，应该使用 <code>htmlspecialchars()</code>函数屏蔽非法字符；最后还有一些小的地方可以改进。</p>
+<p><strong>结果：</strong></p>
+<pre><code>&lt;?php
+if (isset($_GET[&apos;query&apos;])) {
+    echo &apos;&lt;p&gt;Search results for query: &apos; , htmlspecialchars($_GET[&apos;query&apos;], ENT_QUOTES) , &apos;.&lt;/p&gt;&apos;;
+}
+?&gt;
+</code></pre><p>修改部分：</p>
+<ul>
+<li>将PHP短标签换成 <code>&lt;?php ?&gt;</code>，更符合XML规范；</li>
+<li>在输出 <code>$_GET[&#39;query&#39;]</code> 前，判断它是否存在、被定义；</li>
+<li>去掉 <code>echo</code> 中多余的括号；</li>
+<li>用单引号代替双引号，用逗号代替句号，提高 <code>echo</code> 的效率；</li>
+<li>在 <code>htmlspecialchars</code> 函数中使用参数 <code>ENT_QUOTES</code> 来确保引号会被转义，增加安全性。</li>
+</ul>
+<h3 id="PHP中数据类型的判断和转换方法"><a href="#PHP中数据类型的判断和转换方法" class="headerlink" title="PHP中数据类型的判断和转换方法"></a>PHP中数据类型的判断和转换方法</h3><p>PHP的数据类型有7种，分别是 boolean（或为bool）、integer（或为int）、float、string、array、object 和 null。</p>
+<p>判断数据类型的方法是用：<code>is_bool()</code>、<code>is_int()</code>、 <code>is_float()</code>、<code>is_string()</code>、<code>is_array()</code>、<code>is_object()</code>。另外还有一个函数 <code>is_numeric()</code> 用于判断变量是否为数字或者数字组成的字符串。 </p>
+<p>数据类型的转换方式：</p>
+<ul>
+<li>在变量前加上用括号括起来的数据类型，如 <code>(int)</code> <code>(bool)</code> <code>(float)</code> <code>(string)</code> <code>(array)</code> <code>(object)</code>；</li>
+<li>使用3个具体类型的转换函数，<code>intval()</code>、<code>floatval()</code>、<code>strval()</code>；</li>
+<li>使用函数 <code>settype(var, type)</code>；</li>
+</ul>
+<h3 id="PHP何时区分大小写"><a href="#PHP何时区分大小写" class="headerlink" title="PHP何时区分大小写"></a>PHP何时区分大小写</h3><p>区分大小写的时候：</p>
+<ul>
+<li>变量名</li>
+<li>常量名，通常写成大写</li>
+</ul>
+<p>不区分大小写的时候：</p>
+<ul>
+<li>函数名、方法名、类名，在调用时尽量使用和定义时相同的名字；</li>
+<li>魔术常量不区分大小写，如 <code>__LINE__</code>，<code>__FUNCTION__</code>等；</li>
+<li>NULL，TRUE，FLASE不区分；</li>
+<li>类型转换时，如(string) 和（STRING）是相同的；</li>
+</ul>
+<h3 id="count-函数的输出"><a href="#count-函数的输出" class="headerlink" title="count()函数的输出"></a>count()函数的输出</h3><p><code>count()</code> 函数用于统计数组中元素的个数，对其他类型，输出结果为1。</p>
+<pre><code>echo count(&quot;a&quot;);
+echo count(1);
+echo count(2.4);
+echo count(false);
+echo count(new Node());
+</code></pre><p>以上输出结果都为1。但 <code>count(null)</code> 输出为0。</p>
+<h3 id="php-ini中safe-mode选项有什么用？开启后会影响到哪些函数？"><a href="#php-ini中safe-mode选项有什么用？开启后会影响到哪些函数？" class="headerlink" title="php.ini中safe_mode选项有什么用？开启后会影响到哪些函数？"></a>php.ini中safe_mode选项有什么用？开启后会影响到哪些函数？</h3><p>safe_mode 是指PHP的安全模式，开启之后，PHP将会检查当前脚本的拥有者是否和被操作文件的拥有者相同，目的是提供一个相对安全的共享环境。</p>
+<p>因为Linux是多用户的，所以可能出现你的文件被别人写入或者读取的现象。打开PHP的安全模式后，一些与文件操作相关的函数将被限制，同样的一些php拓展中的函数也会受到影响。</p>
+<p>开启后会受到影响的函数有：</p>
+<blockquote>
+<p>chdir, move_uploaded_file, chgrp, parse_ini_file, chown, rmdir, copy, rename, fopen, require, highlight_file, show_source, include, symlink, link, touch, mkdir, unlink, basename, pathinfo</p>
+</blockquote>
+<p>以下执行命令的函数也会受到影响：</p>
+<blockquote>
+<p>exec, shell_exec, passthru, system, popen</p>
+</blockquote>
+<h2 id="PHP函数"><a href="#PHP函数" class="headerlink" title="PHP函数"></a>PHP函数</h2><h3 id="PHP中的静态变量"><a href="#PHP中的静态变量" class="headerlink" title="PHP中的静态变量"></a>PHP中的静态变量</h3><p>指出下面代码的输出结果：</p>
+<pre><code>&lt;?php 
+$count = 5;
+function get_count() {
+    static $count = 0;
+    return $count++;
+}
+echo $count;
+++$count;
+echo get_count();
+echo get_count();
+?&gt;
+</code></pre><p>输出结果是： 5 0 1</p>
+<p>静态变量类型说明符是<strong>static</strong>。</p>
+<p>静态变量属于静态存储方式，其存储空间为内存中的静态数据区，该区域中的数据在整个程序的运行期间一直占用这些存储空间（在程序整个运行期间都不释放），也可以认为是其内存地址不变，直到整个程序运行结束。</p>
+<p>静态变量虽在程序的整个执行过程中始终存在，但是在它作用域之外不能使用。</p>
+<p>所以在自定义函数内的静态变量 <code>count</code> 的值在第二次调用时仍会保留。</p>
+<h3 id="PHP中的全局变量"><a href="#PHP中的全局变量" class="headerlink" title="PHP中的全局变量"></a>PHP中的全局变量</h3><p>指出下面代码的输出结果：</p>
+<pre><code>&lt;?php
+$GLOBALS[&apos;a&apos;] = &quot;hello&quot;;
+$b = 2017;
+
+function get_value() {
+    global $b;
+    $a = 0;
+    return $b++;
+}
+
+get_value();
+echo $a;
+echo $b;
+?&gt;
+</code></pre><p>输出结果是: hello 2018</p>
+<p>在一个函数中引入外部的一个变量，如果该变量没有通过参数传递进来，那么就通过 <code>global</code> 引入进来或者通过 <code>$GLOBALS</code> 数组访问。</p>
+<h3 id="mysql-fetch-row-和mysql-fetch-array-的区别"><a href="#mysql-fetch-row-和mysql-fetch-array-的区别" class="headerlink" title="mysql_fetch_row()和mysql_fetch_array()的区别"></a>mysql_fetch_row()和mysql_fetch_array()的区别</h3><p>二者都是从数据库结果集中取一条记录。区别在于 <code>mysql_fetch_row()</code> 只会以数字数组的方式返回结果，<code>mysql_fetch_array()</code> 可以通过参数设置（<code>MYSQL_ASSOC</code>，<code>MYSQL_NUM</code>、<code>MYSQL_BOTH</code>）返回结果的方式，分别表示关联数组、数字数组和二者都取（默认）。</p>
+<p>数字数组：<code>Array([0] =&gt; Adams [1] =&gt; John [2] =&gt; London)</code></p>
+<p>关联数组：<code>Array([LastName] =&gt; Adams [FirstName] =&gt; John [City] =&gt; London)</code></p>
+<p>二者都取：<code>Array([0] =&gt; Adams [LastName] =&gt; Adams [1] =&gt; John [FirstName] =&gt; John [2] =&gt; London [City] =&gt; London)</code></p>
+<h3 id="打印出前一天的时间，打印格式是2007年5月10日22-21-21"><a href="#打印出前一天的时间，打印格式是2007年5月10日22-21-21" class="headerlink" title="打印出前一天的时间，打印格式是2007年5月10日22:21:21"></a>打印出前一天的时间，打印格式是2007年5月10日22:21:21</h3><pre><code>date_default_timezone_set(&apos;PRC&apos;);   //设置时区
+echo date(&apos;Y年m月d日H:i:s&apos;, strtotime(&quot;-1 day&quot;));
+</code></pre><p><code>strtotime()</code> 可用参数：</p>
+<pre><code>&lt;?php
+echo(strtotime(&quot;now&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;15 October 1980&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;+5 hours&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;+1 week&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;+1 week 3 days 7 hours 5 seconds&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;next Monday&quot;) . &quot;&lt;br&gt;&quot;);
+echo(strtotime(&quot;last Sunday&quot;));
+?&gt;
+</code></pre><h3 id="如何实现字符串翻转？"><a href="#如何实现字符串翻转？" class="headerlink" title="如何实现字符串翻转？"></a>如何实现字符串翻转？</h3><p>两种方式，第一用自带的 <code>strrev()</code> 函数，第二自己写函数。</p>
+<pre><code>function strreverse($str) {
+    $res = &quot;&quot;;
+    for ($i = strlen($str)-1; $i &gt;= 0; $i--) {
+        $res .= $str[$i];
+    }
+    return $res;
+}
+</code></pre><p>原来可以像取数组元素一样获取字符串中的字符。</p>
+<h3 id="获取3个数值中最大值的函数"><a href="#获取3个数值中最大值的函数" class="headerlink" title="获取3个数值中最大值的函数"></a>获取3个数值中最大值的函数</h3><ul>
+<li><p>采用自带的 <code>max()</code> 函数</p>
+</li>
+<li><p>自定义函数</p>
+<p>  function get_max_of_three($a, $b, $c) {</p>
+<pre><code>return $a&gt;$b? ($a&gt;$c? $a: $c): ($b&gt;$c? $b: $c);
+</code></pre><p>  }</p>
+</li>
+</ul>
+<h3 id="PHP中的进制转换"><a href="#PHP中的进制转换" class="headerlink" title="PHP中的进制转换"></a>PHP中的进制转换</h3><p>首先，列出各个进制的英文</p>
+<blockquote>
+<p>二进制： binary –&gt; bin</p>
+</blockquote>
+<blockquote>
+<p>八进制： octal –&gt; oct</p>
+</blockquote>
+<blockquote>
+<p>十进制： decimal –&gt; dec</p>
+</blockquote>
+<blockquote>
+<p>十六进制： hexadecimal –&gt; hex</p>
+</blockquote>
+<p>所以，对应的进制转换函数就是将原进制和目标进制合起来：例如十进制转二进制函数 <code>decbin()</code>，八进制转十进制函数 <code>octdec()</code>。</p>
+<p>另外，进制转换推荐使用这个函数 <code>base_convert()</code></p>
+<blockquote>
+<p>base_convert – 在任意进制之间转换数字 </p>
+</blockquote>
+<blockquote>
+<p>string base_convert ( string number, int frombase, int tobase ) </p>
+</blockquote>
+<blockquote>
+<p>返回一字符串，包含 number 以 tobase 进制的表示。number 本身的进制由 frombase 指定。frombase 和 tobase 都只能在 2 和 36 之间（包括 2 和 36）。高于十进制的数字用字母 a-z 表示，例如 a 表示 10，b 表示 11 以及 z 表示 35。 </p>
+</blockquote>
+<h3 id="将1234567890转换成1-234-567-890-每3位用逗号隔开的形式"><a href="#将1234567890转换成1-234-567-890-每3位用逗号隔开的形式" class="headerlink" title="将1234567890转换成1,234,567,890 每3位用逗号隔开的形式"></a>将1234567890转换成1,234,567,890 每3位用逗号隔开的形式</h3><ul>
+<li><p>自带函数 <code>number_format()</code></p>
+</li>
+<li><p>自定义函数</p>
+<p>  function change_format($str) {</p>
+<pre><code>$str = strrev($str);
+$str = chunk_split($str, 3, &quot;,&quot;);
+$str = strrev($str);
+$str = ltrim($str, &quot;,&quot;);
+return $str;
+</code></pre><p>  }</p>
+</li>
+</ul>
+<h3 id="对二维数组按照某一列进行排序"><a href="#对二维数组按照某一列进行排序" class="headerlink" title="对二维数组按照某一列进行排序"></a>对二维数组按照某一列进行排序</h3><pre><code>&lt;?php
+$list = array(
+    array(&apos;num&apos; =&gt; 7, &apos;value&apos; =&gt; 4),
+    array(&apos;num&apos; =&gt; 3, &apos;value&apos; =&gt; 35),
+    array(&apos;num&apos; =&gt; 38, &apos;value&apos; =&gt; 27),
+);
+$res = array_sort($list, &quot;value&quot;, &quot;ASC&quot;);
+print_r($res);
+
+function array_sort(array $list, $col, $order) {
+    $col_key = array();
+    foreach ($list as $key =&gt; $value) {
+        $col_key[$key] = $value[$col];
+    }
+    if ($order === &quot;ASC&quot;) {
+        asort($col_key);
+    }else{
+        arsort($col_key);
+    }
+    $res = array();
+    foreach ($col_key as $key =&gt; $value) {
+        $res[] = $list[$key];
+    }
+    return $res;
+}
+</code></pre><p>关键是要想到将要排序那列的值和 <code>key</code> 值进行对应，然后按照 <code>key</code> 进行排序。</p>
+<h3 id="禁用Cookie后session还能用吗？"><a href="#禁用Cookie后session还能用吗？" class="headerlink" title="禁用Cookie后session还能用吗？"></a>禁用Cookie后session还能用吗？</h3><p>答案是可以的。</p>
+<p>默认情况下， PHP 的 session 是需要 Cookie 支持的。</p>
+<p><strong>session 的工作原理：</strong> session 是存放在服务器端的。当客户端发起请求并需要创建一个 session 时，服务器首先检查这个客户端的请求里是否已包含了 session id。如果包含则说明之前已经为此客户端创建过 session，服务器就按照 session id 把相关文件检索出来使用。如果检索不到或者客户端请求不包含 session id，则为此客户端新建一个 session 文件并且生成一个对应的 session id。这个session id将被在本次响应中返回给客户端保存。 </p>
+<p>保存这个session id的方式可以采用cookie，这样在交互过程中浏览器可以自动的按照规则把这个标识发挥给服务器。</p>
+<p>但cookie可以被人为的禁止，则必须有其他机制以便在cookie被禁止时仍然能够把session id传递回服务器。 经常被使用的一种技术叫做URL重写，就是把session id直接附加在URL路径的后面。还有一种技术叫做表单隐藏字段。就是服务器会自动修改表单，添加一个隐藏字段，以便在表单提交时能够把session id传递回服务器。</p>
+<h3 id="写一个函数，实现遍历一个文件夹下的所有文件和子文件夹"><a href="#写一个函数，实现遍历一个文件夹下的所有文件和子文件夹" class="headerlink" title="写一个函数，实现遍历一个文件夹下的所有文件和子文件夹"></a>写一个函数，实现遍历一个文件夹下的所有文件和子文件夹</h3><pre><code>function scandir($dir) {
+    $files=array();
+    if(is_dir($dir)) {
+        if($handle = opendir($dir)) {
+            while(($file = readdir($handle)) !== false) {
+                if($file != &quot;.&quot; &amp;&amp; $file != &quot;..&quot;) {
+                    if(is_dir($dir.&quot;/&quot;.$file)) {   //是文件夹
+                        $files[] = candir($dir.&quot;/&quot;.$file);
+                    }else{        //文件
+                        $files[]=$dir.&quot;/&quot;.$file;
+                    }
+                }
+            }
+            closedir($handle);
+            return $files;
+        }
+    }
+}
+</code></pre><p>利用递归实现</p>
+<h3 id="计算文件和磁盘的大小"><a href="#计算文件和磁盘的大小" class="headerlink" title="计算文件和磁盘的大小"></a>计算文件和磁盘的大小</h3><p>获取文件大小的函数： <code>filesize()</code></p>
+<p>返回磁盘的可用空间数： <code>disk_free_space()</code></p>
+<p>返回磁盘的总空间数： <code>disk_total_space()</code></p>
+<p>单位都是字节。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/04/PHP求职宝典-PHP语言基础/" data-id="cjecyyu81003y4cvniz63g2wi" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/04/浅谈PHP-echo中的字符串连接效率/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          浅谈PHP echo中的字符串连接效率
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/03/PHP求职宝典-Web页面设计/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">PHP求职宝典--Web页面设计</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

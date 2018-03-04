@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>进程与线程的区别 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言进程和线程，是操作系统原理中的基本概念，也是面试中经常被问到点。这篇博客是我在看了许多博客基础上总结的，由于我没有系统的学过《操作系统原理》，所以理解上可能有偏差。大家觉得有什么问题，请给我发邮件，一起讨论。 我的邮件：tjutwei@163.com">
+<meta name="keywords" content="进程，线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程与线程的区别">
+<meta property="og:url" content="http://yoursite.com/2017/08/06/进程与线程的区别/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言进程和线程，是操作系统原理中的基本概念，也是面试中经常被问到点。这篇博客是我在看了许多博客基础上总结的，由于我没有系统的学过《操作系统原理》，所以理解上可能有偏差。大家觉得有什么问题，请给我发邮件，一起讨论。 我的邮件：tjutwei@163.com">
+<meta property="og:updated_time" content="2017-08-07T11:50:44.860Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="进程与线程的区别">
+<meta name="twitter:description" content="前言进程和线程，是操作系统原理中的基本概念，也是面试中经常被问到点。这篇博客是我在看了许多博客基础上总结的，由于我没有系统的学过《操作系统原理》，所以理解上可能有偏差。大家觉得有什么问题，请给我发邮件，一起讨论。 我的邮件：tjutwei@163.com">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-进程与线程的区别" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/06/进程与线程的区别/" class="article-date">
+  <time datetime="2017-08-06T12:26:33.000Z" itemprop="datePublished">2017-08-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      进程与线程的区别
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>进程和线程，是操作系统原理中的基本概念，也是面试中经常被问到点。这篇博客是我在看了许多博客基础上总结的，由于我没有系统的学过《操作系统原理》，所以理解上可能有偏差。大家觉得有什么问题，请给我发邮件，一起讨论。</p>
+<p>我的邮件：<a href="mailto:tjutwei@163.com" target="_blank" rel="noopener">tjutwei@163.com</a></p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>进程和线程简单的定义如下：</p>
+<ol>
+<li>进程：是程序的一次执行活动；</li>
+<li>线程：是进程中的最小执行单元；</li>
+</ol>
+<p>下面是详细的解释：</p>
+<p><strong>进程（Process）</strong>是计算机中具有一定独立功能的程序关于某数据集合上的一次运行活动，是系统进行<strong>资源</strong>调度和分配的基本单位，是操作系统结构的基础；</p>
+<p><strong>线程（Thread）</strong>是比进程小的能独立运行的执行单位，是 <strong>CPU</strong> 调度和分配的基本单位。</p>
+<h3 id="深入理解"><a href="#深入理解" class="headerlink" title="深入理解"></a>深入理解</h3><p>相信大家看了以上的定义，还是不太明白吧。接下来我们从一个宏观的层面上来理解：</p>
+<p>首先，计算机的 5 大组成部分我们都不陌生——控制器，运算器，存储器，输入设备和输出设备。这 5 大组成都是抽象的概念，对应到具体的硬件上就是： </p>
+<blockquote>
+<p>CPU = 控制器 + 运算器</p>
+<p>内存 + 硬盘 = 存储器</p>
+<p>主板 = I/O 总线，输入输出系统</p>
+<p>键盘，鼠标，扫描仪，显示器等等 = I/O 设备</p>
+</blockquote>
+<p>而我们所说的<strong>程序</strong>，它的定义是这样的：指为了得到某种结果而可以由计算机等具有信息处理能力的装置执行的代码化指令序列，或者可以被自动转换成代码化指令序列的符号化指令序列或者符号化语句序列。简而言之，就是我们写的代码。</p>
+<p>我们代码想要执行，需要使用计算机的一些资源。除去输入、输出设备，这些资源主要可以分成两类：计算资源和存储资源，也就是电脑的 <strong>CPU</strong> 和 <strong>内存（RAM）</strong>，这两样东西是我们程序运行不可或缺的。在执行程序时，需要向计算机申请。</p>
+<p>也许你要问了，我们写代码时，并没有申请过这些东西啊？只是写好代码，点击运行就行了。确实，你没有自己做这件事，那是因为别人替你做过了。这个好心人就是<strong>操作系统</strong>。</p>
+<p>我们 CPU 和 内存两个方面出发，来学习操作系统的作用，最终来理解进程和线程。</p>
+<h4 id="CPU和调度器"><a href="#CPU和调度器" class="headerlink" title="CPU和调度器"></a>CPU和调度器</h4><p>在单核计算机里，CPU 是无法被多个程序并行使用的，也就是同一时间，只有一个程序能占用 CPU。没有操作系统的情况下，一个程序一直独占着 CPU，直到它运行结束。</p>
+<p>当有多个程序，但只有一个 CPU 时，怎么办呢？是大家轮流着来，执行完 A 再执行 B？还是 A 先执行 1 分钟轮 B，然后 1 分钟后再轮 A？</p>
+<p>这个获取 CPU 的策略就是所谓的 “进程调度”。当然，我们还没讲到进程，先忽略它。总而言之，多个程序共享一个 CPU 时，需要程序员出手调节。程序员安排好运行计划 – 某时刻 CPU 由 A 来独享，下一时刻 CPU 由 B 来独享，或者其他类似的计划。</p>
+<p>这种安排计划后来成为操作系统的一个核心组件，被单独名命为 Scheduler，即<strong>调度器</strong>，它关心的只是怎样把单个 CPU 的运行拆分成一段一段的“运行片”，轮流分给不同的程序去使用，而在宏观上，因为分配切换的速度极快，就制造出多程序并行在一个 CPU 上的假象。</p>
+<h4 id="内存和虚拟内存"><a href="#内存和虚拟内存" class="headerlink" title="内存和虚拟内存"></a>内存和虚拟内存</h4><p>现在 CPU 分配的任务解决了，该考虑内存的分配了。内存不像 CPU，它可以被同时多个程序共用。</p>
+<p>也许你觉得这样就不需要分配了，大家一起用就好了。但是这样是有问题的，例如：</p>
+<blockquote>
+<p>内存覆盖</p>
+</blockquote>
+<p>程序 A 申请了一块内存，用于存放自己的数据，并且在获得 CPU 的时候运行了一会儿。这时，调度器通知它，CPU 现在得给 B 用了，你先等着吧。此时 A 就得记录下自己的执行情况和中间变量，然后让出 CPU。但是 B 申请内存时，和 A 重叠了，当它进行运算时，覆盖了 A 保存的内容。当再次轮到 A 使用 CPU 时，A 懵逼了，它根本不知道上次运行到哪了，所以就崩溃了。</p>
+<p>当然，这个问题好解决，就是在第一开始，程序员就手工为每个程序安排运行的空间 – A 使用物理地址 0x00-0xff 的内存块，B 使用物理地址 0x100-0x1ff 的内存块，等等。</p>
+<blockquote>
+<p>内存浪费</p>
+</blockquote>
+<p>给每个程序分配一块内存，并保证它们不重复，确实解决了内存覆盖的问题，但是这样的效率并不高。因为在分配内存时，要分配给它所需要的最大内存，但这个程序并不是时刻都需要这么大的内存。而它的空闲内存因为已经有主人了，所以不能分配给其他的程序。这就造成了浪费。</p>
+<p>所以，我们需要一个内存分配的策略，来确保每个程序都有合适的内存可用。<strong>“虚拟内存”</strong>就是为了解决这个问题引入的，它分配给程序“一个连续完整的地址空间”，但实际上这个地址空间是被分隔成多个物理内存碎片，还有部分暂时存储在外部磁盘存储器上，在需要时进行数据交换。</p>
+<p>为了实现这个功能，在硬件上，CPU 增加了一个专门的模块叫 MMU（Memory Management Unit），负责转换虚拟地址和物理地址；在操作系统上，增加了另一个核心组件：Memory Management，即内存管理模块，它管理物理内存、虚拟内存相关的一系列事务。</p>
+<p>具体的内存分配过程是这样的：每个程序在启动和执行时，会被分配到一块虚拟内存空间。这个虚拟地址空间是“完全一样”的，经由操作系统和硬件 MMU 协作，会映射到不同的物理地址空间上。</p>
+<p>注：</p>
+<blockquote>
+<ol>
+<li>不同的程序对应不同的的物理内存空间，彼此独立，不用一些特殊手段，无法访问别的程序的物理内存；</li>
+<li>虚拟内存完全一致，是指这段虚拟内存空间的起点和终点都一样。例如在 32 位的系统中，分配的虚拟内存空间大小为 4GB（2^32字节），它起始于 0x00000000 结束于 0xFFFFFFFF；</li>
+<li>虚拟内存通过下面两个方式解决内存浪费问题：<ul>
+<li>不是每个程序都分配 4GB 的物理内存，而是按需为每个程序分配，4GB 是 32 位系统中一个程序所能占空间的上限；</li>
+<li>将程序所需的内存划分为 4KB 大小的内存页，并根据使用情况将这些内存页存储在硬盘上或加载到 RAM 中；</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<h4 id="进程和线程"><a href="#进程和线程" class="headerlink" title="进程和线程"></a>进程和线程</h4><p>总结上面的内容，就是通过调度器和虚拟内存，每个程序启动和执行都可以获取到所需要的内存和 CPU。</p>
+<p>人们把上面这句话中的“程序启动和执行”概括成了一个词，叫做<strong>进程</strong>。进程就表示程序的执行过程，所以上面那句话可以这样说：通过调度器和虚拟内存，每个进程都可以获取到所需要的内存和 CPU。</p>
+<p>现在，不同的程序，可以不关心底层的物理内存分配，也不用关心 CPU 的协调共享。但是又出现了一个问题：在程序执行的时候，怎么尽可能高效地利用系统分配给它的内存？怎样才能利用进程的空闲内存呢？这个问题的本质就是如何共享相同的内存。</p>
+<p>上面说到，每个进程的内存都是相互独立的，不能彼此访问，所以共享相同的内存只能在进程内部解决。这时候，一个叫<strong>线程</strong>的模型就出现了，它们被包裹在进程里面，在调度器的管理下共享 CPU，拥有同样的虚拟地址空间，同时也共享同一个物理地址空间，然而，它们无法越过包裹自己的进程，去访问别的进程的地址空间。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>不管是进程还是线程，描述的都是一段代码的执行过程，不同的是它们代表的计算机资源分配和调度方式。</p>
+<p>可以共享内存的方式是线程，内存独立的方式是进程；进程的代码包括整个程序，线程的代码可能是这个程序的一部分；CPU 是操作系统分配给进程的，但具体执行是在线程上。</p>
+<blockquote>
+<p>注：在有的操作系统里，进程不是调度单位（即不能被调度器使用），线程是最基本的调度单位，调度器只调度线程，不调度进程，比如 VxWorks</p>
+</blockquote>
+<h3 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h3><h4 id="进程与线程的区别"><a href="#进程与线程的区别" class="headerlink" title="进程与线程的区别"></a>进程与线程的区别</h4><ol>
+<li>最大的区别就是对系统资源的占用。进程拥有比较多的系统资源，而线程基本上不拥有系统资源，只拥有一点在运行中必不可少的资源（如程序计数器，一组寄存器和栈），但是它可与同属一个进程的其他的线程共享进程所拥有的全部资源；</li>
+<li>线程不能独立运行，它依赖于进程，进程不依赖线程；</li>
+<li>一个程序至少包含一个进程，一个进程至少包含一个线程；</li>
+<li>进程有独立的地址空间，一个进程崩溃后，在保护模式下不会对其它进程产生影响，而线程挂掉就等于整个进程挂掉，所以多进程的程序要比多线程的程序健壮；</li>
+</ol>
+<h4 id="进程与程序的区别"><a href="#进程与程序的区别" class="headerlink" title="进程与程序的区别"></a>进程与程序的区别</h4><p>程序是指令和数据的有序集合，其本身没有任何运动的含义，是一个静态的概念，而进程则是在处理机上的一次执行过程，它是一个动态的概念。</p>
+<p>进程的执行离不开程序，在给进程分配的虚拟地址空间中，有一个叫做代码区，存放着程序的代码。</p>
+<blockquote>
+<p>注：分配给每个进程的内存可以分成 4 个区：栈区、堆区、数据区和代码区。</p>
+</blockquote>
+<blockquote>
+<p>栈区：主要用来存放局部变量, 传递参数, 存放函数的返回地址；</p>
+<p>堆区：用于存放动态分配的对象, 当使用 malloc 和 new 等进行分配时，所得到的空间就在堆中。动态分配得到的内存区域附带有分配信息, 所以可以 free 和 delete 它们；</p>
+<p>数据区：全局，静态和常量是分配在数据区中的，数据区包括 bss（未初始化数据区）和初始化数据区。</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html" target="_blank" rel="noopener">进程与线程的一个简单解释</a></p>
+<p><a href="https://www.zhihu.com/question/25532384" target="_blank" rel="noopener">线程和进程的区别是什么？</a></p>
+<p><a href="http://www.cnblogs.com/way_testlife/archive/2011/04/16/2018312.html" target="_blank" rel="noopener">应届生经典面试题：说说进程与线程的区别与联系</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/06/进程与线程的区别/" data-id="cjecyyucd008y4cvnj2vmhteq" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/08/PHP的多进程-基础介绍/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP的多进程--基础介绍
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/06/常用正则实例/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">常用正则实例</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

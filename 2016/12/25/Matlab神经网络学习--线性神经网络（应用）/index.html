@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Matlab神经网络学习--线性神经网络（应用） | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="介绍这里实现了两个实验，第一个通过对“与”逻辑的学习，比较了感知器和线性神经网络的优劣性；第二个通过对“异或”逻辑的学习，演示了线性神经网络对于非线性分类问题的解决方案。">
+<meta name="keywords" content="Matlab,神经网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Matlab神经网络学习--线性神经网络（应用）">
+<meta property="og:url" content="http://yoursite.com/2016/12/25/Matlab神经网络学习--线性神经网络（应用）/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="介绍这里实现了两个实验，第一个通过对“与”逻辑的学习，比较了感知器和线性神经网络的优劣性；第二个通过对“异或”逻辑的学习，演示了线性神经网络对于非线性分类问题的解决方案。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/and_linearlayer.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/%E6%9B%B4%E6%96%B0%E5%85%AC%E5%BC%8F.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-1.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-2.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-3.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-4.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-5.jpg">
+<meta property="og:updated_time" content="2016-12-26T02:09:47.020Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Matlab神经网络学习--线性神经网络（应用）">
+<meta name="twitter:description" content="介绍这里实现了两个实验，第一个通过对“与”逻辑的学习，比较了感知器和线性神经网络的优劣性；第二个通过对“异或”逻辑的学习，演示了线性神经网络对于非线性分类问题的解决方案。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/and_linearlayer.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Matlab神经网络学习--线性神经网络（应用）" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/25/Matlab神经网络学习--线性神经网络（应用）/" class="article-date">
+  <time datetime="2016-12-25T08:26:43.000Z" itemprop="datePublished">2016-12-25</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/科研/">科研</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Matlab神经网络学习--线性神经网络（应用）
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>这里实现了两个实验，第一个通过对“与”逻辑的学习，比较了感知器和线性神经网络的优劣性；第二个通过对“异或”逻辑的学习，演示了线性神经网络对于非线性分类问题的解决方案。</p>
+<a id="more"></a>
+<h2 id="实验1"><a href="#实验1" class="headerlink" title="实验1"></a>实验1</h2><p><strong>描述：</strong>用感知器和线性神经网络来学习“与”逻辑</p>
+<pre><code>%% 清理
+close all
+clear,clc
+
+%% 定义变量
+P=[0,0,1,1;0,1,0,1]            % 输入向量
+d=[0,0,0,1]                % 期望输出向量
+lr=maxlinlr(P,&apos;bias&apos;)            % 根据输入矩阵求解最大学习率
+
+%% 线性网络实现
+net1=linearlayer(0,lr);         % 创建线性网络
+net1=train(net1,P,d);           % 线性网络训练
+
+%% 感知器实现
+net2=newp([-1,1;-1,1],1,&apos;hardlim&apos;);     % 创建感知器
+net2=train(net2,P,d);           % 感知器学习
+
+%% 显示
+disp(&apos;线性网络输出&apos;)             % 命令行输出
+Y1=sim(net1,P)
+disp(&apos;线性网络二值输出&apos;);
+YY1=Y1&gt;=0.5
+disp(&apos;线性网络最终权值：&apos;)
+w1=[net1.iw{1,1}, net1.b{1,1}]
+disp(&apos;感知器输出&apos;)
+Y2=sim(net2,P)
+disp(&apos;感知器二值输出&apos;);
+YY2=Y2&gt;=0.5
+disp(&apos;感知器最终权值：&apos;)
+w2=[net2.iw{1,1}, net2.b{1,1}]
+
+plot([0,0,1],[0,1,0],&apos;o&apos;);          % 图形窗口输出
+hold on;
+plot(1,1,&apos;d&apos;);
+x=-2:.2:2;
+y1=1/2/w1(2)-w1(1)/w1(2)*x-w1(3)/w1(2);   % 1/2是区分0和1的阈值
+plot(x,y1,&apos;-&apos;);
+y2=-w2(1)/w2(2)*x-w2(3)/w2(2);      % hardlim函数以0为阈值，分别输出0或1
+plot(x,y2,&apos;--&apos;);
+axis([-0.5,2,-0.5,2])
+xlabel(&apos;x&apos;);ylabel(&apos;ylabel&apos;);
+title(&apos;线性神经网络与感知器用于求解与逻辑&apos;)
+legend(&apos;0&apos;,&apos;1&apos;,&apos;线性神经网络分类面&apos;,&apos;感知器分类面&apos;);
+</code></pre><p>执行结果：</p>
+<p>线性网络最终权值：w1 =    0.5000    0.5000   -0.2500</p>
+<p>感知器最终权值：w2 =    2     1    -3</p>
+<p>所以线性网络得到的决策面是：1/2(x + y) - 1/4 = 1/2，而感知器得到的结果是2x + 1 -3 = 0。</p>
+<p>结果图如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/and_linearlayer.jpg" alt=""></p>
+<p><strong>结论：</strong> </p>
+<p>从结果图中可以看出，线性网络的分类面大致位于两类坐标点的中间位置，而感知器得到的分类面恰好穿过了其中的一个坐标点。</p>
+<p>在大部分情况下，线性神经网络的分类边界往往处于两类模式的中间，而感知器学习的分类边界在刚刚能够正确分类的位置就停下来了。这样就导致了分类边界距离一些样本过近，对噪声敏感，泛化能力差。这一点上，线性网络的性能要优于感知器。</p>
+<p>其实，从权重更新的公式来看，二者的差别不是很大（尽管通常认为LMS算法更加合理）。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/%E6%9B%B4%E6%96%B0%E5%85%AC%E5%BC%8F.jpg" alt=""></p>
+<p>所以根本原因在于，二者的传输函数不同。感知器使用的是二值阈值的函数，输出只有1和0（-1），因此，只要有一次达到了某个值，该值的二值化输出是正确的，那么误差<code>e(n) = [d(n) - y(n)]</code>就为0，这样权重就不会更新了。而线性网络使用的传输函数是线性的，误差值会随着输出值不断变化 ，从而使权值不断地更新，最终获得误差最小（指定）的最优解。</p>
+<h2 id="实验2"><a href="#实验2" class="headerlink" title="实验2"></a>实验2</h2><p><strong>描述：</strong>实现“异或”逻辑，非线性可分。</p>
+<p>根据上一篇线性神经网络对于非线性可分问题的解决方案，首先采用在输入中增加非线性成分的方法来实现。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-1.jpg" alt=""></p>
+<p>添加了x1^2，x2^2，x1*x2，这样输入向量由原来的2维拓展到了5维。</p>
+<pre><code>%% 清理
+close all
+clear,clc
+
+%% 定义变量
+P1=[0,0,1,1;0,1,0,1]                % 原始输入向量
+p2=P1(1,:).^2;
+p3=P1(1,:).*P1(2,:);
+p4=P1(2,:).^2;
+P=[P1(1,:);p2;p3;p4;P1(2,:)]        % 添加非线性成分后的输入向量
+d=[0,1,1,0]                         % 期望输出向量
+lr=maxlinlr(P,&apos;bias&apos;)            % 根据输入矩阵求解最大学习率
+
+%% 线性网络实现
+net=linearlayer(0,lr);              % 创建线性网络
+net=train(net,P,d);                 % 线性网络训练
+
+%% 显示
+disp(&apos;网络输出&apos;)                    % 命令行输出
+Y1=sim(net,P)
+disp(&apos;网络二值输出&apos;);
+YY1=Y1&gt;=0.5
+disp(&apos;最终权值：&apos;)
+w1=[net.iw{1,1}, net.b{1,1}]                   
+plot([0,1],[0,1],&apos;o&apos;,&apos;LineWidth&apos;,2);    % 图形窗口输出        
+hold on;
+plot([0,1],[1,0],&apos;d&apos;,&apos;LineWidth&apos;,2);
+axis([-0.1,1.1,-0.1,1.1]);
+xlabel(&apos;x&apos;);ylabel(&apos;y&apos;);
+title(&apos;线性神经网络用于求解异或逻辑&apos;);
+x=-0.1:.1:1.1;y=-0.1:.1:1.1;
+N=length(x);
+X=repmat(x,1,N);
+Y=repmat(y,N,1);Y=Y(:);Y=Y&apos;;
+P=[X;X.^2;X.*Y;Y.^2;Y];
+yy=net(P);
+y1=reshape(yy,N,N);
+[C,h]=contour(x,y,y1,0.5,&apos;b&apos;);
+clabel(C,h);
+legend(&apos;0&apos;,&apos;1&apos;,&apos;线性神经网络分类面&apos;);
+</code></pre><p>执行结果：</p>
+<pre><code>最终权值：w1 = 0.5000    0.5000   -2.0000    0.5000    0.5000    0.0000
+</code></pre><p>决策面的分类图：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-2.jpg" alt="添加非线性成分"></p>
+<p>另外一种方法就是采用多个输出神经元，也就是Madaline的方法。对输出神经元的值进行判断，最终得到分类结果。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-3.jpg" alt=""></p>
+<p>这里使用了两个神经元，第一个神经元将左上角的坐标点和其它3个分开，属于线性分类，同样的，第二个神经元将右下角的坐标点和其他3个分开，也属于线性分类。在得到这两个神经元节点的输出后，进行“与非”操作，就实现了“异或”的逻辑。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-4.jpg" alt=""></p>
+<p>代码如下：</p>
+<pre><code>%% 清理
+close all
+clear,clc
+
+%% 第一个神经元
+P1=[0,0,1,1;0,1,0,1];               % 输入向量
+d1=[1,0,1,1];                       % 期望输出向量
+lr=maxlinlr(P1,&apos;bias&apos;);             % 根据输入矩阵求解最大学习率
+
+net1=linearlayer(0,lr);             % 创建线性网络
+net1=train(net1,P1,d1);             % 线性网络训练
+
+%% 第二个神经元
+P2=[0,0,1,1;0,1,0,1];               % 输入向量
+d2=[1,1,0,1];                       % 期望输出向量
+lr=maxlinlr(P2,&apos;bias&apos;);             % 根据输入矩阵求解最大学习率
+
+net2=linearlayer(0,lr);             % 创建线性网络
+net2=train(net2,P2,d2);             % 线性网络训练
+
+Y1=sim(net1,P1);Y1=Y1&gt;=0.5;
+Y2=sim(net2,P2);Y2=Y2&gt;=0.5;
+Y=~(Y1&amp;Y2);
+%% 显示
+disp(&apos;第一个神经元最终权值：&apos;)      % 命令行输出
+w1=[net1.iw{1,1}, net1.b{1,1}]
+disp(&apos;第二个神经元最终权值：&apos;)
+w2=[net2.iw{1,1}, net2.b{1,1}]
+disp(&apos;第一个神经元测试输出：&apos;)
+Y1
+disp(&apos;第二个神经元测试输出：&apos;);
+Y2
+disp(&apos;最终输出：&apos;);
+Y
+
+plot([0,1],[0,1],&apos;bo&apos;);             % 图形窗口输出
+hold on;
+plot([0,1],[1,0],&apos;d&apos;);
+x=-2:.2:2;
+y1=1/2/w1(2)-w1(1)/w1(2)*x-w1(3)/w1(2);   % 第一条直线,1/2是区分0和1的阈值
+plot(x,y1,&apos;-&apos;);
+y2=1/2/w2(2)-w2(1)/w2(2)*x-w2(3)/w2(2);   % 第二条直线，1/2是区分0和1的阈值
+plot(x,y2,&apos;--&apos;);
+axis([-0.1,1.1,-0.1,1.1])
+xlabel(&apos;x&apos;);ylabel(&apos;y&apos;);
+title(&apos;Madaline用于求解异或逻辑&apos;)
+legend(&apos;0&apos;,&apos;1&apos;,&apos;第一条直线&apos;,&apos;第二条直线&apos;);
+</code></pre><p>执行输出：</p>
+<pre><code>第一个神经元最终权值： w1 = 0.5000   -0.5000    0.7500
+
+第二个神经元最终权值： w2 = -0.5000    0.5000    0.7500
+
+第一个神经元测试输出： Y1 = 1     0     1     1
+
+第二个神经元测试输出： Y2 = 1     1     0     1
+
+最终输出：Y =   0     1     1     0
+</code></pre><p>结果图是这样的：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/linearlayer/xor-5.jpg" alt=""></p>
+<p>就是两个线性神经网络的合并，每个区分其中的一部分结果（线性可区分的），然后将结果通过逻辑关系连接起来。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/12/25/Matlab神经网络学习--线性神经网络（应用）/" data-id="cjecyyu6a001s4cvns4s5h17s" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/神经网络/">神经网络</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/12/26/Matlab神经网络学习--BP神经网络（介绍）/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          Matlab神经网络学习--BP神经网络（介绍）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/12/24/Matlab神经网络学习--线性神经网络（介绍）/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Matlab神经网络学习--线性神经网络（介绍）</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

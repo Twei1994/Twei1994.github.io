@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>牛客网PHP工程师能力评估 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言今天发现牛客网还有一个 PHP 工程师能力评估，就顺手做了一下。这里记录下做错的和不太确定的题。">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="牛客网PHP工程师能力评估">
+<meta property="og:url" content="http://yoursite.com/2017/08/28/牛客网PHP工程师能力评估/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言今天发现牛客网还有一个 PHP 工程师能力评估，就顺手做了一下。这里记录下做错的和不太确定的题。">
+<meta property="og:updated_time" content="2017-08-29T12:28:58.713Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="牛客网PHP工程师能力评估">
+<meta name="twitter:description" content="前言今天发现牛客网还有一个 PHP 工程师能力评估，就顺手做了一下。这里记录下做错的和不太确定的题。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-牛客网PHP工程师能力评估" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/28/牛客网PHP工程师能力评估/" class="article-date">
+  <time datetime="2017-08-28T13:05:03.000Z" itemprop="datePublished">2017-08-28</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/编程基础/">编程基础</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      牛客网PHP工程师能力评估
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>今天发现牛客网还有一个 PHP 工程师能力评估，就顺手做了一下。这里记录下做错的和不太确定的题。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="unset-和-null"><a href="#unset-和-null" class="headerlink" title="unset 和 null"></a>unset 和 null</h3><p><strong>题目：</strong>下面代码的输出结果是什么？</p>
+<pre><code>$a = &quot;hello&quot;;
+$b = &amp;$a;
+unset($b);
+$b = &quot;world&quot;;
+echo $a;
+</code></pre><p><strong>答案：</strong> <code>hello</code></p>
+<p><strong>分析：</strong></p>
+<p><code>$a = &quot;hello&quot;</code> 这句将字符串 hello 赋值给变量 a，实际上是建立了一个 zval，并将 a 存到符号表中，同时建立了这两者之间的联系。 </p>
+<p><code>$b = &amp;$a</code> 这句声明变量 b 是 a 引用，本质上是将 b 存到符号表中，同时将它指向 a 对应的那个 zval。 这样，不管 a 和 b 哪个发生变化，都会同时改变另一个的值。</p>
+<p><code>unset($b)</code> 的作用是将变量值 b 从符号表中删除，也就断开了它和 zval 之间的联系。这个时候，因为还有 a 指向这个 zval，所以它不算泄露的内存，也就不会被回收。</p>
+<p><code>$b = &quot;world&quot;</code> 相当于新建了一个 zval 同将符号表中的 b 指向它，这个操作不会对 a 产生任何影响。 </p>
+<p>所以最终输出 a，就是原来的值。</p>
+<h3 id="empty"><a href="#empty" class="headerlink" title="empty()"></a>empty()</h3><p><strong>题目：</strong>下面代码的输出结果是什么？</p>
+<pre><code>&lt;?php
+        $var = FALSE;
+        if (empty($var)){
+               echo &quot;null&quot;;
+        }else{
+               echo &quot;have value&quot;;
+        }
+?&gt;
+</code></pre><p><strong>答案：</strong><code>null</code></p>
+<p><strong>分析：</strong></p>
+<p>如果 var 是<strong>非空或非零</strong>的值，则 empty() 返回 FALSE。</p>
+<p>换句话说，””、 0、 “0”、 NULL、 FALSE、 array()、 var $var、以及没有任何属性的对象都将被认为是空的，如果 var 为空，则返回 TRUE。</p>
+<h3 id="strcmp"><a href="#strcmp" class="headerlink" title="strcmp()"></a>strcmp()</h3><p><strong>题目：</strong>下面代码的输出结果是什么</p>
+<pre><code>$str = “LAMP”;
+$str1 = “LAMPBrother”;
+$strc = strcmp($str,$str1);
+switch ($strc){
+    case 1:
+        echo“str &gt; str1”;
+        break;
+    case –1:
+        echo“str &lt; str1”;
+        break;
+    case 0:
+        echo“str=str1”;
+        break;
+    default:
+        echo“str &lt;&gt; str1”;
+}
+</code></pre><p><strong>答案：</strong> <code>str &lt;&gt; str1</code></p>
+<p><strong>分析：</strong></p>
+<p>函数 <code>strcmp($str1, $str2)</code>，如果 $str1 和 $str2 存在包含关系，并且是从头开始就是包含关系，（类似题目中的情况），但 ‘AB’ 和 ‘cAB’不算，这时返回的就是它们不同的字符的个数，谁的字符多谁大；如果不存在这种包含关系，那么就根据不同字符的ASCII码大小关系返回-1,1。</p>
+<pre><code>strcmp(&quot;A&quot;, &quot;Abcdf&quot;)   // -4，存在从头包含关系
+strcmp(&quot;a&quot;, &quot;Abcdf&quot;)   // 1
+strcmp(&quot;abc&quot;, &quot;Aabcd&quot;) // 1，包含，但是从头开始
+</code></pre><h3 id="三元运算符"><a href="#三元运算符" class="headerlink" title="三元运算符"></a>三元运算符</h3><p><strong>题目：</strong>哪一个三元运算符相当于此脚本？</p>
+<pre><code>&lt;?php
+       if ($a &lt; 10){
+              if($b &gt; 11){
+                     if($c == 10 &amp;&amp; $d != $c) {
+                            $x=0;
+                     }else {
+                            $x=1;
+                     }
+              }
+       }
+?&gt;
+</code></pre><p><strong>答案：</strong>没有三元运算符能表示</p>
+<p><strong>分析：</strong>三元运算符是水平层级的运算，而多层 if 嵌套是一种递进的运算。也就是不管三元运算符前面的条件是什么，<code>$x = (.......) ? 0: 1</code>，最终只有两个结果， x = 0 或者 x = 1。但是在多层嵌套的 if 语句中，当 a &gt;= 10 时，这个程序已经结束，不会对 x 进行赋值。</p>
+<h3 id="final修饰符"><a href="#final修饰符" class="headerlink" title="final修饰符"></a>final修饰符</h3><p><strong>题目：</strong>在PHP面向对象中，下面关于 final 修饰符描述错误的是（ ）</p>
+<ul>
+<li>A. 使用 final 标识的类不能被继承</li>
+<li>B. 在类中使用 final 标识的成员方法，在子类中不能被覆盖</li>
+<li>C. 不能使用 final 标识成员属性</li>
+<li>D. 使用 final 标识的成员属性，不能在子类中再次定义</li>
+</ul>
+<p><strong>答案：</strong>D，不能用 final 修饰成员属性</p>
+<p><strong>分析：</strong></p>
+<p>final 修饰符，只能用于修饰类和方法。</p>
+<p>修饰类的时候，该类不能被继承；修饰方法的时候，该方法不能被子类重写。</p>
+<h3 id="对象的复制"><a href="#对象的复制" class="headerlink" title="对象的复制"></a>对象的复制</h3><p><strong>题目：</strong>下面代码的输出结果是什么？</p>
+<pre><code>&lt;?php 
+class A{
+    public $num=100; 
+}
+$a = new A();
+$b = $a;
+$a-&gt;num=200;
+echo $b-&gt;num;
+?&gt;
+</code></pre><p><strong>答案：</strong>200</p>
+<p><strong>分析：</strong></p>
+<p>知识点是<strong>对象的复制</strong>。在 PHP 中，对象是 <code>$a -&gt; 对象标识符 -&gt; 实际数据</code> 这种方式存储的。</p>
+<p>有 3 种实现对象复制的方法：</p>
+<pre><code>$b = $a;  
+$b = &amp;$a;
+$b = clone $a;
+</code></pre><p>第一种方式，$b 复制了 $a 的对象标识符，但指向同一个实际数据，修改对象实际数据时有影响。但修改 $b 的值时，如 <code>$b = &#39;aaa&#39;</code>，会写时复制，就成了两个独立的变量了；</p>
+<p>第二种方式，$b 是 $a 的引用，它们共享一个对象标识符，共享同一个内存地址，所以就相当于一个变量，任何更改都会影响到对方；</p>
+<p>第三种方式，采用 clone 实现对象的复制，相当于新建了一个对象，不管是对象标示符还是实际数据都是独立的，更改不会影响对方。</p>
+<h3 id="get-class-，获取对象类名"><a href="#get-class-，获取对象类名" class="headerlink" title="get_class()，获取对象类名"></a>get_class()，获取对象类名</h3><p><strong>题目：</strong>获得实例化对象所属类名字的函数是（）</p>
+<p><strong>答案：</strong>get_class()</p>
+<p><strong>分析：</strong></p>
+<p>相关的函数有 3 个：</p>
+<pre><code>get_class(object $object)  // 返回实例所属的类名
+get_class_vars(string $class_name)  // 根据类名返回类的属性组成的数组
+get_class_methods(类名/对象)   // 根据类名或对象返回类的方法组成的数组
+</code></pre><blockquote>
+<p>注：get_class_vars(get_class($object)) 通过对象获得实例的属性</p>
+</blockquote>
+<h3 id="PDO错误模式"><a href="#PDO错误模式" class="headerlink" title="PDO错误模式"></a>PDO错误模式</h3><p>PDO中一共提供了三种不同的错误处理模式</p>
+<ul>
+<li>PDO::ERRMODE_SILENT：不显示错误信息，只显示错误码</li>
+<li>PDO::ERRMODE_WARNING：显示警告错误</li>
+<li>PDO::ERRMODE_EXCEPTION：抛出异常</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/28/牛客网PHP工程师能力评估/" data-id="cjecyyubx00834cvnqj3mwu0f" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/30/MySQL之explain详解/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          MySQL之explain详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/23/PHP的标准输入和输出/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">PHP的标准输入和输出</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Matlab神经网络学习--径向基函数网络（介绍） | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="介绍RBF网络原理RBF网络，即径向基神经网络，也是前馈型网络的一种。它的设计思想和BP网络完全不一样。">
+<meta name="keywords" content="Matlab,神经网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Matlab神经网络学习--径向基函数网络（介绍）">
+<meta property="og:url" content="http://yoursite.com/2016/12/27/Matlab神经网络学习--径向基函数网络（介绍）/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="介绍RBF网络原理RBF网络，即径向基神经网络，也是前馈型网络的一种。它的设计思想和BP网络完全不一样。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-2.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-7.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-10.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-13.jpg">
+<meta property="og:updated_time" content="2016-12-27T10:47:29.730Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Matlab神经网络学习--径向基函数网络（介绍）">
+<meta name="twitter:description" content="介绍RBF网络原理RBF网络，即径向基神经网络，也是前馈型网络的一种。它的设计思想和BP网络完全不一样。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-2.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Matlab神经网络学习--径向基函数网络（介绍）" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/27/Matlab神经网络学习--径向基函数网络（介绍）/" class="article-date">
+  <time datetime="2016-12-27T08:27:43.000Z" itemprop="datePublished">2016-12-27</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/科研/">科研</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Matlab神经网络学习--径向基函数网络（介绍）
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><h3 id="RBF网络原理"><a href="#RBF网络原理" class="headerlink" title="RBF网络原理"></a>RBF网络原理</h3><p>RBF网络，即径向基神经网络，也是前馈型网络的一种。它的设计思想和BP网络完全不一样。</p>
+<a id="more"></a>
+<p><strong>Cover定理：</strong>将复杂的模式分类问题非线性的投射到高维空间将比投射到低维空间更可能是线性可分的。也就是说这个问题在低维空间不一定是线性可分的，但如果把它映射到高纬度的空间去，在那里就可能是线性可分的。这就是RBF网络的原理。</p>
+<p>RBF将问题转换为线性可分之后便没有了BP网络的局部极小值问题。但是RBF需要比BP网络更多的隐含层神经元。</p>
+<p>RBF网络是一个三层的网络，出了输入输出层之外仅有一个隐层。隐层中的转换函数是局部响应的高斯函数，而其他前向型网络，转换函数一般都是全局响应函数（如Sigmoid函数）。由于这样的不同，要实现同样的功能，RBF需要更多的神经元，这就是RBF网络不能取代标准前向型网络的原因。但是RBF的训练时间更短。它对函数的逼近是最优的，可以以任意精度逼近任意连续函数。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-2.jpg" alt=""></p>
+<h3 id="RBF网络学习过程"><a href="#RBF网络学习过程" class="headerlink" title="RBF网络学习过程"></a>RBF网络学习过程</h3><p>在RBF网络之前训练，需要给出输入向量X和目标向量T，训练的目的是要求得第一层和第二层之间的权值W1、阀值B1，和第二层与第三层之间的权值W2、阀值B2。</p>
+<p>整个网络的训练分为两步，第一部是无监督的学习，求W1、B1。第二步是有监督的学习求W2、B2。</p>
+<h3 id="隐藏层神经元个数"><a href="#隐藏层神经元个数" class="headerlink" title="隐藏层神经元个数"></a>隐藏层神经元个数</h3><p>网络会从0个神经元开始训练，通过检查输出误差使网络自动增加神经元。每次循环使用，重复过程直到误差达到要求。因此RBF网络具有结构自适应确定，输出与初始权值无关的特征。（BP网络就不这样）</p>
+<h3 id="广义回归神经网络GRNN"><a href="#广义回归神经网络GRNN" class="headerlink" title="广义回归神经网络GRNN"></a>广义回归神经网络GRNN</h3><p>径向基神经元和线性神经元可以建立广义回归神经网络，它是径RBF网络的一种变化形式，经常用于函数逼近。在某些方面比RBF网络更具优势。</p>
+<h3 id="概率神经网络PNN"><a href="#概率神经网络PNN" class="headerlink" title="概率神经网络PNN"></a>概率神经网络PNN</h3><p>径向基神经元和竞争神经元还可以组成概率神经网络。PNN也是RBF的一种变化形式，结构简单训练快捷，特别适合于模式分类问题的解决。</p>
+<h3 id="扩展速度spread的确定"><a href="#扩展速度spread的确定" class="headerlink" title="扩展速度spread的确定"></a>扩展速度spread的确定</h3><p>RBF网络有个参数叫扩展速度spread，在MATLAB中创建RBF网络时是要事先设定好的，其默认值为1。</p>
+<p>spread越大，函数拟合越平滑，但是逼近误差会变大，需要的隐藏神经元也越多，计算也越大。</p>
+<p>spread越小，函数的逼近会越精确，但是逼近过程会不平滑，网络的性能差，会出现过适应现象。</p>
+<p>所以具体操作的时候要对不同的spread值进行尝试，spread即要大到使得神经元产生响应的输入范围能够覆盖足够大的区域，同时也不能太大，而使各个神经元都具有重叠的输入向量响应区域。</p>
+<h2 id="常用函数"><a href="#常用函数" class="headerlink" title="常用函数"></a>常用函数</h2><h3 id="newrb–设计一个径向基函数网络"><a href="#newrb–设计一个径向基函数网络" class="headerlink" title="newrb–设计一个径向基函数网络"></a>newrb–设计一个径向基函数网络</h3><pre><code>net = newrb(P, T, goal, spread, MN, DF)
+</code></pre><p>newrb函数创建网络的过程是一个不断尝试隐藏层神经元个数的过程，在创建过程中，会根据误差不断向隐藏层添加神经元，直到均方误差满足要求为止。</p>
+<ul>
+<li>P: R*Q的矩阵，R是输入向量的维数（特征维数），Q是训练样本的个数</li>
+<li>T: S*Q的矩阵，S是输出向量的值（标签值）</li>
+<li>goal: 目标均方误差值，默认为0</li>
+<li>spread: 扩展速度，默认值为1</li>
+<li>MN: 隐含层节点最大数目，最大值为Q</li>
+<li>DF: 两次显示之间所添加的神经元个数，默认值为25</li>
+</ul>
+<p>除P、T之外，其余参数都是可选的。</p>
+<h3 id="newrbe–设计一个严格的径向基网络"><a href="#newrbe–设计一个严格的径向基网络" class="headerlink" title="newrbe–设计一个严格的径向基网络"></a>newrbe–设计一个严格的径向基网络</h3><pre><code>net = newrbe(P, T, spread)
+</code></pre><p>和newrb函数功能差不多，用于创建一个精确地神经网络，能够基于设计向量快速的无误差的设计一个径向基网络。该函数在创建RBF网络的时候，自动选择隐含层数目，隐藏层的数目等于样本输入向量的数目，使得误差为0。在样本输入向量非常多的情况下，用RBE就不大合适。</p>
+<h3 id="newpnn–设计概率神经网络"><a href="#newpnn–设计概率神经网络" class="headerlink" title="newpnn–设计概率神经网络"></a>newpnn–设计概率神经网络</h3><pre><code>net = newpnn(P, T, spread)
+</code></pre><p>创建一个概率神经网络，是一个适用于分类的神经网络。spread的默认参数是0.1，spread对分类性能的影响非常大。当spread接近于0时，对应的PNN就成为了一个最近邻分类器（K-Nearest Neightbor, KNN），当spread逐渐增大时，网络会将中心附近的向量也考虑进来。</p>
+<h3 id="newgrnn–设计广义回归神经网络"><a href="#newgrnn–设计广义回归神经网络" class="headerlink" title="newgrnn–设计广义回归神经网络"></a>newgrnn–设计广义回归神经网络</h3><pre><code>net = newgrnn(P, T, spred)
+</code></pre><p>创建一个广义回归神经网络，通常用于函数逼近，本质上是用已知样本点进行插值的过程。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><h3 id="实例1"><a href="#实例1" class="headerlink" title="实例1"></a>实例1</h3><p><strong>描述：</strong>用newrb函数创建一个径向基函数网络，拟合一个含有噪声的正弦曲线</p>
+<pre><code>P=1:.5:10;
+rand(&apos;state&apos;,pi);
+T=sin(2*P)+rand(1,length(P));                  % 给正弦函数加噪声
+plot(P,T,&apos;o&apos;)
+% net=newrb(P,T);
+net=newrb(P,T,0,0.6);
+test=1:.2:10;
+out=sim(net,test);                            % 对新的输入值test计算相对应的函数值
+figure(1);hold on;plot(test,out,&apos;r-&apos;);
+legend(&apos;输入的数据&apos;,&apos;拟合的函数&apos;);
+</code></pre><p>实验结果图：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-7.jpg" alt=""></p>
+<p>其中，蓝色曲线为<code>spread = 1</code>时拟合的效果，红色曲线为<code>spread = 0.6</code>时的效果，可见spread值越小，拟合效果越精细。</p>
+<h3 id="实例2"><a href="#实例2" class="headerlink" title="实例2"></a>实例2</h3><p><strong>描述：</strong>用newrbe函数拟合一个含有噪声的二次函数</p>
+<pre><code>tic
+P=-2:.2:2;
+rand(&apos;state&apos;,pi);
+T=P.^2+rand(1,length(P));    % 在二次函数中加入噪声
+net=newrbe(P,T,3);            % 建立严格的径向基函数网络
+test=-2:.1:2;
+out=sim(net,test);            % 仿真测试
+toc
+figure(1);
+plot(P,T,&apos;o&apos;);
+hold on;
+plot(test,out,&apos;b-&apos;);
+legend(&apos;输入的数据&apos;,&apos;拟合的函数&apos;);
+</code></pre><p>tic，toc用于计时，运行时间为Elapsed time is 0.234397 seconds.</p>
+<p>实验结果图：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-10.jpg" alt=""></p>
+<p>如果使用newrb函数来代替newrbe，也可以得到相同的结果，但是速度要慢一点。</p>
+<h3 id="实例3"><a href="#实例3" class="headerlink" title="实例3"></a>实例3</h3><p><strong>描述：</strong>用pnn解决一个坐标点分类问题</p>
+<pre><code>rng(2);
+a=rand(8,2)*10;            % 输入训练样本，8个二维向量
+p=ceil(a)
+
+tc=[2,1,1,1,2,1,2,1];        % 期望输出
+plot(p([1,5,7],1),p([1,5,7],2),&apos;o&apos;);
+hold on;
+plot(p([2,3,4,6,8],1),p([2,3,4,6,8],2),&apos;+&apos;);
+legend(&apos;第一类&apos;,&apos;第二类&apos;);
+axis([0,10,0,10]);
+hold off
+t=ind2vec(tc);            % 将下边形式转换成向量形式
+net=newpnn(p&apos;,t);        % 设计PNN网络
+y=sim(net,p&apos;);            % 仿真
+yc=vec2ind(y)            % 实际输出等于期望输出
+</code></pre><p>坐标点分布：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/RBF/7-13.jpg" alt=""></p>
+<p>结果输出：</p>
+<pre><code>yc = 2     1     1     1     2     1     2     1
+</code></pre><p>可见，和期望输出结果一样。</p>
+<h3 id="实例4"><a href="#实例4" class="headerlink" title="实例4"></a>实例4</h3><p><strong>描述：</strong>用GRNN做最简单的插值，已知在1,2,3处的值，求取在1.5和2.5处的值</p>
+<pre><code>P = [1 2 3];                % 训练输入向量
+T = [2.0 4.1 5.9]            % 训练输入的期望输出值
+net = newgrnn(P,T);            % 设计GRNN网络
+x=[1.5,2.5];                % 测试输出。计算x=1.5和x=2.5的查找
+y=sim(net,x)                % 测试结果
+</code></pre><p>执行结果： y =  3.3667    4.6667</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/12/27/Matlab神经网络学习--径向基函数网络（介绍）/" data-id="cjecyyu6a001h4cvnscw5dzuq" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/神经网络/">神经网络</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/12/27/Matlab神经网络学习--BP神经网络（应用二）/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          Matlab神经网络学习--BP神经网络（应用二）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/12/26/Matlab神经网络学习--BP神经网络（应用）/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Matlab神经网络学习--BP神经网络（应用）</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP的标准输入和输出 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言写了这么久的 PHP，到现在连 PHP 的标准输入和输出都不知道，真是惭愧。直到昨天做笔试题的时候，遇到了这个要求，结果傻眼了。先不说算法实现，就连参数都获取不到，还谈什么 AC 呢。于是，笔试结束后，赶紧查了相关资料，学习下 PHP 的标准输入和输出。">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP的标准输入和输出">
+<meta property="og:url" content="http://yoursite.com/2017/08/23/PHP的标准输入和输出/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言写了这么久的 PHP，到现在连 PHP 的标准输入和输出都不知道，真是惭愧。直到昨天做笔试题的时候，遇到了这个要求，结果傻眼了。先不说算法实现，就连参数都获取不到，还谈什么 AC 呢。于是，笔试结束后，赶紧查了相关资料，学习下 PHP 的标准输入和输出。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/stdin.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/constant_stdin.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/example.png">
+<meta property="og:updated_time" content="2017-08-23T05:19:43.709Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP的标准输入和输出">
+<meta name="twitter:description" content="前言写了这么久的 PHP，到现在连 PHP 的标准输入和输出都不知道，真是惭愧。直到昨天做笔试题的时候，遇到了这个要求，结果傻眼了。先不说算法实现，就连参数都获取不到，还谈什么 AC 呢。于是，笔试结束后，赶紧查了相关资料，学习下 PHP 的标准输入和输出。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/stdin.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP的标准输入和输出" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/23/PHP的标准输入和输出/" class="article-date">
+  <time datetime="2017-08-23T03:13:41.000Z" itemprop="datePublished">2017-08-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP的标准输入和输出
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>写了这么久的 PHP，到现在连 PHP 的标准输入和输出都不知道，真是惭愧。直到昨天做笔试题的时候，遇到了这个要求，结果傻眼了。先不说算法实现，就连参数都获取不到，还谈什么 AC 呢。于是，笔试结束后，赶紧查了相关资料，学习下 PHP 的标准输入和输出。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="php-stdin-php-stdout-php-stderr"><a href="#php-stdin-php-stdout-php-stderr" class="headerlink" title="php://stdin  php://stdout  php://stderr"></a>php://stdin  php://stdout  php://stderr</h3><p>PHP 提供了 3 个输入输出流来处理输入，输出和错误设备，分别是 <code>php://stdin</code>，<code>php://stdout</code> 和 <code>php://stderr</code>。对它们的使用与使用文件类似（把它们 3 个看成 3 个文件即可），通过 <code>fopen</code>、<code>fgets</code>、<code>fwrite</code>、<code>fread</code> 和 <code>fclose</code> 来实现。</p>
+<blockquote>
+<p>注： <code>php://stdin</code> 是只读的（”r”），<code>php://stdout</code> 和 <code>php://stderr</code> 是只写的（”w”）</p>
+</blockquote>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><pre><code>&lt;?php
+// 标准输入
+$fp_in = fopen(&quot;php://stdin&quot;, &quot;r&quot;);
+$name = trim(fgets($fp_in));
+echo $name;
+fclose($fp_in);
+
+// 标准输出
+$msg = &quot;Hello World&quot;;
+$fp_out = fopen(&quot;php://stdout&quot;, &quot;w&quot;);
+fwrite($fp_out, $msg);
+fclose($fp_out);
+
+// 标准错误
+$error = &quot;Error!!!&quot;;
+$fp_err = fopen(&quot;php://stderr&quot;, &quot;w&quot;);
+fwrite($fp_err, $error);
+fclose($fp_err);
+</code></pre><p>在 CLI 模式下运行上面的代码，执行结果如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/stdin.png" alt=""></p>
+<p>其中，第一行的 twei 是我通过键盘输入的，第二行的内容都是输出（其中 twei 是通过 echo 输出的，剩下的两个分别通过 php://stdout 和 php://stderr 输出）。</p>
+<h3 id="STDIN-STDOUT-STDERR"><a href="#STDIN-STDOUT-STDERR" class="headerlink" title="STDIN  STDOUT  STDERR"></a>STDIN  STDOUT  STDERR</h3><p>是不是感觉上面的方法有一点麻烦，每次都要打开和关闭相关文件句柄。PHP 在 CLI 模式中给我们提供了 3 个常量，分别代表了响应的文件句柄。</p>
+<table>
+<thead>
+<tr>
+<th>常量</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STDIN</td>
+<td>标准的输入设备</td>
+</tr>
+<tr>
+<td>STDOUT</td>
+<td>标准的输出设备</td>
+</tr>
+<tr>
+<td>STDERR</td>
+<td>标准的错误设备</td>
+</tr>
+</tbody>
+</table>
+<h3 id="实例-1"><a href="#实例-1" class="headerlink" title="实例"></a>实例</h3><p>还是上面的功能，通过这 3 个常量实现：</p>
+<pre><code>&lt;?php
+$name = trim(fgets(STDIN));
+echo $name,&quot;\n&quot;;
+
+$msg = &quot;Hello World!\n&quot;;
+fwrite(STDOUT, $msg);
+
+$err = &quot;Error!!&quot;;
+fwrite(STDERR, $err);
+</code></pre><p>代码量减少了很多，执行结果如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/constant_stdin.png" alt=""></p>
+<p>其中，第一行的 twei 是我通过键盘输入的，剩下的内容都是输出（其中 twei 是通过 echo 输出的，剩下的两个分别通过 STDOUT 和 STDERR 输出）。</p>
+<h3 id="一个实例"><a href="#一个实例" class="headerlink" title="一个实例"></a>一个实例</h3><p>面试中常见的问题：输入第一行表示点的个数，剩下的表示点的坐标。例如：</p>
+<pre><code>3
+[1,2]
+[3,4]
+[1,4]
+</code></pre><p>那么，我们怎么实现这个步骤呢？可以采用如下代码：</p>
+<pre><code>&lt;?php
+$num = trim(fgets(STDIN));
+for ($i = 0; $i &lt; $num; $i++) { 
+    $points[] = trim(fgets(STDIN));
+}
+</code></pre><p>这样，$num 里面就是个数， $points 里面就是点的坐标（注意，为字符串，不是数组）。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/phpstdin/example.png" alt=""></p>
+<p>可以使用这个函数将 “[1,2]” 类型的字符串转成数组：</p>
+<pre><code>function strToArr($str) {
+    list($fir, $sec) = explode(&quot;,&quot;, $str);
+    list( , $fir) = explode(&quot;[&quot;, $fir);
+    list($sec, ) = explode(&quot;]&quot;, $sec);
+    return array($fir, $sec);
+}
+</code></pre><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://php.net/manual/zh/wrappers.php.php" target="_blank" rel="noopener">php://</a></p>
+<p><a href="http://blog.csdn.net/e421083458/article/details/8077297" target="_blank" rel="noopener">php的标准输入与输出</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/23/PHP的标准输入和输出/" data-id="cjecyyu9c00594cvnojx4w66d" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/28/牛客网PHP工程师能力评估/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          牛客网PHP工程师能力评估
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/20/MySQL缓存-InnoDB缓存buffer-pool/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">MySQL缓存--InnoDB缓存buffer pool</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

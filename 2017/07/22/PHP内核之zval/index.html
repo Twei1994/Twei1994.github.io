@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP内核之zval | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。 希望各位发现错误后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP内核之zval">
+<meta property="og:url" content="http://yoursite.com/2017/07/22/PHP内核之zval/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。 希望各位发现错误后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com">
+<meta property="og:updated_time" content="2017-07-22T16:18:51.976Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP内核之zval">
+<meta name="twitter:description" content="前言PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。 希望各位发现错误后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP内核之zval" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/22/PHP内核之zval/" class="article-date">
+  <time datetime="2017-07-22T12:19:25.000Z" itemprop="datePublished">2017-07-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/PHP内核/">PHP内核</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP内核之zval
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。</p>
+<p>希望各位发现错误后不吝指正，谢谢。</p>
+<p>我的邮箱是: <a href="mailto:tjutwei@163.com" target="_blank" rel="noopener">tjutwei@163.com</a></p>
+<a id="more"></a>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="http://twei.site/2017/07/22/PHP%E5%86%85%E6%A0%B8%E4%B9%8Bzval/" target="_blank" rel="noopener">PHP内核之zval</a></p>
+<p><a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">PHP的垃圾回收机制</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="PHP中的数据类型"><a href="#PHP中的数据类型" class="headerlink" title="PHP中的数据类型"></a>PHP中的数据类型</h3><p>相对于 C、 C++、 Java等其他编程语言，PHP 是一个弱类型的语言，意味着当我们要使用一个变量时，不需要去声明它的类型。这个特性给我们带来了很多便利，同时有时也会带来一些陷阱。那么，PHP 是真的没有数据类型这个说法吗？</p>
+<p>当然不是。在 PHP 官方文档中将 PHP 中的变量划分为三类：<strong>标量类型</strong>、<strong>复杂类型</strong>和<strong>特殊类型</strong>。标量类型包括布尔型（bool）、整型（int）、浮点型（float）和字符串（string）；复杂类型包括数组（array）和对象（object）；特殊类型包括 NULL 和资源（resource）。所以说 PHP 的变量细分的话，有 8 种数据类型。</p>
+<p>总所周知，PHP 的底层是用 C 语言实现的。我们的 PHP 脚本会经过 Zend 引擎解析为 C 代码再执行。那么，一个 PHP 的变量，在 C 语言上是怎么表示的呢？它最终会被解析成什么样呢？</p>
+<p>答案就是 zval。 不管什么类型的 PHP 变量，在 PHP 源代码中统一用一个叫做 zval 的结构表示。 zval 可以看做是 PHP 变量在 C 代码中的容器，它存储了这个变量的值、类型等相关信息。</p>
+<p>那么我们就看一下 zval 的基本结构（需要一点 C 语言的基本知识）。</p>
+<h3 id="zval的基本结构"><a href="#zval的基本结构" class="headerlink" title="zval的基本结构"></a>zval的基本结构</h3><p>在 PHP 源代码中 zval 这个结构是一个名叫 <code>_zval_struct</code> 的结构体（struct），具体定义在源代码的 <code>Zend/zend.h</code> 文件中，下面是相关代码的摘录:</p>
+<pre><code>struct _zval_struct {
+    zvalue_value value;       /* value */ 
+    zend_uint refcount__gc;   /* value of ref count */
+    zend_uchar type;          /* active type */ 
+    zend_uchar is_ref__gc;    /* if it is a ref variable */ 
+}; 
+typedef struct _zval_struct zval;
+</code></pre><p>也就是说，在 PHP 的源码中，就用这一个结构体表示 PHP 中各种类型的变量，并且还可以实现其他的一些功能，例如垃圾回收（GC：Grabage Collection）。</p>
+<p>可以看到它由 4 个字段构成，分别表示这个变量的某个信息。</p>
+<h4 id="zvalue-value-value"><a href="#zvalue-value-value" class="headerlink" title="zvalue_value value"></a>zvalue_value value</h4><p>value 用来表示变量的实际值，具体来说它是一个 zvalue_value 的联合体（union）:</p>
+<pre><code>typedef union _zvalue_value {
+    long lval;                  /* long value */
+    double dval;                /* double value */
+    struct {                    /* string */
+        char *val;
+        int len;
+    } str;
+    HashTable *ht;              /* hash table value,used for array */
+    zend_object_value obj;      /* object */
+} zvalue_value;
+</code></pre><p>可以看到 _zvalue_value 中只有 5 个字段，但是 PHP 中有 8 种数据类型，那么如何用 5 个字段表示 8 种类型呢？</p>
+<p>这算是 PHP 设计比较巧妙的一个地方，它通过复用字段达到了减少字段的目的。例如，在 PHP 内部布尔型、整型及资源（只要存储资源的标识符即可）都是通过 lval 字段存储的；dval 用于存储浮点型；str 存储字符串；ht 存储数组(注意 PHP 中的数组其实是哈希表)；而 obj 存储对象类型；如果所有字段全部置为 0 或 NULL则表示 PHP 中的 NULL，这样就达到了用 5 个字段存储 8 种类型的值。</p>
+<h4 id="zend-uint-refcount-gc"><a href="#zend-uint-refcount-gc" class="headerlink" title="zend_uint refcount__gc"></a>zend_uint refcount__gc</h4><p>从它的后缀 gc 可以看到，这个字段是和垃圾回收相关的。</p>
+<p>它实际上是一个计数器，用来保存有多少变量指向该zval。在变量生成时，置为1，也就是 refcount = 1。</p>
+<p>对变量进行不同的操作会改变它的值。典型的赋值操作如 <code>$a = $b</code> 会使 refcount 加 1，而 <code>unset()</code> 操作会相应的减 1。</p>
+<p>通过判断它的值可以进行垃圾回收。在 PHP5.3 之前，使用<strong>引用计数</strong>的机制来实现 GC：如果一个 zval 的 refcount 减为 0，那么 Zend 引擎会认为没有任何变量指向该 zval，就会释放该 zval 所占的内存空间。但仅仅使用引用计数机制无法释放掉循环引用的 zval，这是就会导致内存泄露（Memory Leak）。</p>
+<p>在 5.3 以前，这个字段的名字还叫做 refcount，5.3 以后，在引入新的垃圾回收算法来对付循环引用，作者加入了大量的宏来操作 refcount，为了能让错误更快的显现，所以改名为 refcount__gc， 迫使大家都使用宏来操作 refcount。</p>
+<p>类似的， 还有第四个字段 is_ref， 这个值表示了 PHP 中的一个类型是否是引用。</p>
+<p>想了解 PHP 的垃圾回收机制，可以参考这篇博客：<a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">PHP的垃圾回收机制</a></p>
+<p>注：变量，也可以被称为符号，symbol。所有的符号都存在符号表（symbol table）中, 不同的作用域使用不同的符号表，关于这一点，<a href="">这篇博客</a>进行了讲解。</p>
+<h4 id="zend-uchar-type"><a href="#zend-uchar-type" class="headerlink" title="zend_uchar type"></a>zend_uchar type</h4><p>这个字段用于表明变量属于 PHP 8 种类型的哪种。在 zend 内部，这些类型对应于下面的宏（代码位置 phpsrc/Zend/zend.h）：</p>
+<pre><code>#define IS_NULL     0
+#define IS_LONG     1
+#define IS_DOUBLE   2
+#define IS_BOOL     3
+#define IS_ARRAY    4
+#define IS_OBJECT   5
+#define IS_STRING   6
+#define IS_RESOURCE 7
+#define IS_CONSTANT 8
+#define IS_CONSTANT_ARRAY   9
+#define IS_CALLABLE 10
+</code></pre><h4 id="zend-uchar-is-ref-gc"><a href="#zend-uchar-is-ref-gc" class="headerlink" title="zend_uchar is_ref__gc"></a>zend_uchar is_ref__gc</h4><p>这个字段用于标记变量是否是引用变量。对于普通的变量，该值为 0，而对于引用型的变量，该值为 1。这个变量会影响 zval 的共享、分离等。它也和 PHP 的垃圾回收有关。</p>
+<h3 id="PHP7中的zval"><a href="#PHP7中的zval" class="headerlink" title="PHP7中的zval"></a>PHP7中的zval</h3><p>上述的 zval 结构，随着时间的发展，暴露出许多问题，例如占用空间大（24 字节）、不支持拓展、 对象和引用效率差等，所以在 PHP7 的时候，对 zval 进行了较大的改变，现在它的结构是这样的：</p>
+<pre><code>struct _zval_struct {
+    union {
+        zend_long         lval;             /* long value */
+        double            dval;             /* double value */
+        zend_refcounted  *counted;
+        zend_string      *str;
+        zend_array       *arr;
+        zend_object      *obj;
+        zend_resource    *res;
+        zend_reference   *ref;
+        zend_ast_ref     *ast;
+        zval             *zv;
+        void             *ptr;
+        zend_class_entry *ce;
+        zend_function    *func;
+        struct {
+            uint32_t w1;
+            uint32_t w2;
+        } ww;
+    } value;
+    union {
+        struct {
+            ZEND_ENDIAN_LOHI_4(
+                zend_uchar    type,         /* active type */
+                zend_uchar    type_flags,
+                zend_uchar    const_flags,
+                zend_uchar    reserved)     /* call info for EX(This) */
+        } v;
+        uint32_t type_info;
+    } u1;
+    union {
+        uint32_t     var_flags;
+        uint32_t     next;                 /* hash collision chain */
+        uint32_t     cache_slot;           /* literal cache slot */
+        uint32_t     lineno;               /* line number (for ast nodes) */
+        uint32_t     num_args;             /* arguments number for EX(This) */
+        uint32_t     fe_pos;               /* foreach position */
+        uint32_t     fe_iter_idx;          /* foreach iterator index */
+    } u2;
+};
+</code></pre><p>虽然看起来变得好大，但其实仔细看，它的字段都是联合体，这个新的 zval 在 64 位环境下，只需要 16 个字节（2 个指针 size）。PHP7 中的 zval，已经变成了一个值指针，它要么保存着原始值，要么保存着指向一个保存原始值的指针。</p>
+<p>这部分内容来自<a href="https://github.com/laruence/php7-internal/blob/master/zval.md" target="_blank" rel="noopener">鸟哥的GitHub</a>，我没怎么看懂，所以就写到这里了。等之后有了新的理解再更新。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>zval 是一种 C 语言实现的数据结构，功能是作为 PHP 变量的容器；</li>
+<li>它保存了变量的各种信息（如类型和值），并为其他功能（如垃圾回收）提供支持；</li>
+<li>在不同的 PHP 版本中，它的结构不同。PHP7 的 zval 占 16 个字节，PHP5 的要占 24 个字节。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.csdn.net/ohmygirl/article/details/41542445" target="_blank" rel="noopener">PHP内核探索之变量（1）变量的容器-Zval</a></p>
+<p><a href="http://www.cnblogs.com/lovehappying/p/3679356.html" target="_blank" rel="noopener">PHP垃圾回收深入理解</a></p>
+<p><a href="https://github.com/laruence/php7-internal/blob/master/zval.md" target="_blank" rel="noopener">深入理解PHP7之zval</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/22/PHP内核之zval/" data-id="cjecyyu81003k4cvnr3a14852" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/22/PHP的垃圾回收机制/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP的垃圾回收机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/21/数组中的逆序对的个数/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">数组中的逆序对的个数</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MySQL缓存--MyISAM缓存key cache | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL缓存--MyISAM缓存key cache">
+<meta property="og:url" content="http://yoursite.com/2017/08/20/MySQL缓存-MyISAM缓存key-cache/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/myisam_key_cache.jpg">
+<meta property="og:updated_time" content="2017-08-20T15:04:06.516Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL缓存--MyISAM缓存key cache">
+<meta name="twitter:description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/myisam_key_cache.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-MySQL缓存-MyISAM缓存key-cache" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/20/MySQL缓存-MyISAM缓存key-cache/" class="article-date">
+  <time datetime="2017-08-20T02:54:46.000Z" itemprop="datePublished">2017-08-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL缓存--MyISAM缓存key cache
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。</p>
+<a id="more"></a>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="">MySQL缓存–服务器缓存query cache</a></p>
+<p><a href="">MySQL缓存–MyISAM缓存key cache</a></p>
+<p><a href="">MySQL缓存–InnoDB缓存buffer pool</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>本文介绍 MySQL 缓存中的数据库引擎级别的缓存机制–MyISAM 采用的 Key Cache。</p>
+<h3 id="Key-Cache"><a href="#Key-Cache" class="headerlink" title="Key Cache"></a>Key Cache</h3><p>为了最小化磁盘 I/O，MyISAM 将最频繁访问的<strong>索引块</strong>（“index block”）都放在内存中，这样的内存缓冲区我们称之为 Key Cache。</p>
+<p>它的大小可以通过参数 key_buffer_size 来控制。所谓的索引块，就是在 MyISAM 的索引文件中（.MYI）的连续单元（contiguous unit）。Key Cache 是以 Block 为单位进行缓存的。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p>MySQL 通过一个队列实现 Key Cache 功能。当 MySQL 请求（读或写）MyISAM 索引文件中某个 Index Block 时，首先会检查 Key Cache 队列中是否已经缓存了对应 block。如果有，就直接在 Key Cache 队列中进行读写了，不再需要请求磁盘。如果是写请求，那么 Key Cache 中的对应 Block 就会被标记为 Dirty（和磁盘不一致）。在 MyISAM 在Key Cache 成功请求（读写）某个 Block 后，会将该 Block 放到 Key Cache 队列的头部。</p>
+<p>如果 Key Cache 中没有待请求（读或写）的 Block，MyISAM 会向磁盘请求对应的 Block，并将其放到 Key Cache 的队列头部。队列如果满了，会将队列尾部的 Block 删除，该 Block 如果是 Dirty 的，会将其 Flush 到磁盘上。我们看到 MyISAM 维护了一个 <strong>LRU(Least Recently Used)</strong> 的队列。</p>
+<p>以上过程用图表示如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/myisam_key_cache.jpg" alt=""></p>
+<p>图中黑色部分为磁盘中的 Index 文件</p>
+<h3 id="Midpoint-Insertion-Strategy"><a href="#Midpoint-Insertion-Strategy" class="headerlink" title="Midpoint Insertion Strategy"></a>Midpoint Insertion Strategy</h3><p>除了 LRU 策略之外，MyISAM 还有另外一种缓存淘汰策略，称为 Midpoint Insertion Strategy，个人理解就是一个 LRU-2 算法，也就是通过维护两个队列，来将缓存淘汰的条件从最近 1 次没使用变成了最近 2 次没使用。</p>
+<p>(1) 该策略将前面的 LRU 队列分成两部分，hot sub-chain 和 warm sub-chain。并根据参数 key_cache_division_limit 划分，总保持 warm sub-chain 在这个百分比以上。默认情况 key_cache_division_limit 是 100，所以默认时候只有 warm sub-chain，即 LRU Chain。</p>
+<p>(2) 在 warm sub-chain 中的某个 block 如果被访问 (Access) 次数超过某个值时候，就将该 block 放到 hot sub-chain 的底部。</p>
+<p>(3) 在 hot sub-chain 中的 block 会随着每一次的 hit 调整位置，hit 越多，越接近底部。在顶部停留时间过长就会被降级到 warm sub-chain 中，而且是 warm sub-chain 的顶部(很可能很快就会被移出 key cache)。</p>
+<p>(4) Hot sub-chain 中的顶部的 block 停留时间超过一个阈值后就会被降级到 warm sub-chain。这个阈值由参数 key_cache_age_threshold 决定。具体的计算方法是：设 N 为 key cache 中的 block 个数，如果在最近的 (N*key_cache_age_threshold/100) 次访问中，key cache 顶部的 block 仍然没有被访问到，那么就会被移到 warm sub-chain 的顶部。</p>
+<p>(5) 默认情况 key_cache_division_limit = 100，这时只有只有一个 Chain，所以不使用该策略。即退化的 Midpoint Insertion Strategy 是 LRU 算法。</p>
+<h3 id="配置参数和状态参数"><a href="#配置参数和状态参数" class="headerlink" title="配置参数和状态参数"></a>配置参数和状态参数</h3><p>通过 <code>show variables like &quot;key_cache%&quot;;</code> 来查看 Key Cache 的配置参数：</p>
+<pre><code>mysql&gt; show variables like &quot;%key_cache%&quot;;
++--------------------------+-------+
+| Variable_name            | Value |
++--------------------------+-------+
+| key_cache_age_threshold  | 300   |
+| key_cache_block_size     | 1024  |
+| key_cache_division_limit | 100   |
++--------------------------+-------+
+</code></pre><p>主要有 3 个， <code>key_cache_age_threshold</code> 决定一个 Index Block 了从 hot sub-chain 降级到 warm sub-chain 的条件； <code>key_cache_block_size</code> 是 Key Cache 中每个 Block 的大小；<code>key_cache_division_limit</code> 设置了 warm sub-chain 占整个 LRU chain 的比例。</p>
+<p>还有另外一个重要的参数叫做 <code>key_buffer_size</code>，它设置了用于做 Key Cache 的内存的大小。</p>
+<p>通过 <code>show status like &quot;key%&quot;;</code>可以观察 Key Cache 的使用状态：</p>
+<pre><code>mysql&gt; show status like &quot;key%&quot;;
++------------------------+----------+
+| Variable_name          | Value    |
++------------------------+----------+
+| Key_blocks_not_flushed | 14468    |
+| Key_blocks_unused      | 0        |
+| Key_blocks_used        | 14497    |
+| Key_read_requests      | 30586575 |
+| Key_reads              | 157      |
+| Key_write_requests     | 7100408  |
+| Key_writes             | 1199800  |
++------------------------+----------+
+</code></pre><h3 id="在复制MyISAM表时需要注意的事项"><a href="#在复制MyISAM表时需要注意的事项" class="headerlink" title="在复制MyISAM表时需要注意的事项"></a>在复制MyISAM表时需要注意的事项</h3><p>内存中缓存的索引块（Key Cache），有时候并不会及时刷新到磁盘上，所以对于正在运行的数据表的索引文件（MYI）一般都是不完整的。如果此时拷贝或者移动这些索引文件。多半会出现索引文件损坏的情况。</p>
+<p>可以通过 <code>Flush table</code> 命令来将 Key Cache 中的 block 都 flush 到磁盘上。所以，一般要动态移动 MyISAM 表需要执行以下步骤：</p>
+<p>首先，刷新数据表，并锁住数据表：(注意，请不要在业务高峰期执行)</p>
+<p><code>FLUSH TABLES WITH READ LOCK;</code></p>
+<p>可以通过下面的命令来查看没有被 Flush 的索引块数量</p>
+<pre><code>mysql&gt; show status like &quot;Key_blocks_not_flushed&quot;;
++------------------------+----------+
+| Variable_name          | Value    |
++------------------------+----------+
+| Key_blocks_not_flushed | 0        |
++------------------------+----------+
+</code></pre><p>最后，移动对应的文件（.MYI .MYD .FRM)。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.92csz.com/04/1158.html" target="_blank" rel="noopener">详解MyISAM Key Cache</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/20/MySQL缓存-MyISAM缓存key-cache/" data-id="cjecyyu76002n4cvntbj9qkpc" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/20/MySQL缓存-InnoDB缓存buffer-pool/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          MySQL缓存--InnoDB缓存buffer pool
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/20/MySQL缓存-服务器缓存query-cache/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">MySQL缓存--服务器缓存query cache</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

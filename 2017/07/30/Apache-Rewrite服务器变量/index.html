@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Apache Rewrite服务器变量 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言Rewrite 作为 Web 服务器的核心功能之一，提供了通过正则表达式与请求路径的匹配，同时还提供了一个系统级变量供调用，本篇文章主要介绍 Apache 中 Rewrite 模块的服务器变量。">
+<meta name="keywords" content="Apache,rewrite">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Rewrite服务器变量">
+<meta property="og:url" content="http://yoursite.com/2017/07/30/Apache-Rewrite服务器变量/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言Rewrite 作为 Web 服务器的核心功能之一，提供了通过正则表达式与请求路径的匹配，同时还提供了一个系统级变量供调用，本篇文章主要介绍 Apache 中 Rewrite 模块的服务器变量。">
+<meta property="og:updated_time" content="2017-08-01T03:55:46.490Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache Rewrite服务器变量">
+<meta name="twitter:description" content="前言Rewrite 作为 Web 服务器的核心功能之一，提供了通过正则表达式与请求路径的匹配，同时还提供了一个系统级变量供调用，本篇文章主要介绍 Apache 中 Rewrite 模块的服务器变量。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Apache-Rewrite服务器变量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/30/Apache-Rewrite服务器变量/" class="article-date">
+  <time datetime="2017-07-30T01:39:47.000Z" itemprop="datePublished">2017-07-30</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Apache Rewrite服务器变量
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Rewrite 作为 Web 服务器的核心功能之一，提供了通过正则表达式与请求路径的匹配，同时还提供了一个系统级变量供调用，本篇文章主要介绍 Apache 中 Rewrite 模块的服务器变量。</p>
+<a id="more"></a>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>Apache 提供给 rewirte 模块的环境变量大概分成 5个类型。下面一一说明，来源于 apache 官方文档。</p>
+<p>其中，经常被用到的有如下几个： HTTP_HOST、HTTP_REFERER、SERVER_NAME、</p>
+<h3 id="HTTP-headers-部分参数"><a href="#HTTP-headers-部分参数" class="headerlink" title="HTTP headers 部分参数"></a>HTTP headers 部分参数</h3><p><strong>HTTP_USER_AGENT</strong></p>
+<p>含义：用户使用的浏览器（包括版本号），操作系统（包括版本号）。</p>
+<p>样例参考值: Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_USER_AGENT”]</p>
+<p><strong>HTTP_REFERER</strong></p>
+<p>含义：之前网页的地址，告诉服务器当前请求是从哪个页面链接过来的，服务器基此可以获得一些信息用于处理，可以用于防止盗链。</p>
+<p>样例参考值: <a href="http://www.test.cn/test.php" target="_blank" rel="noopener">http://www.test.cn/test.php</a></p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_REFERER”]</p>
+<p><strong>HTTP_COOKIE</strong></p>
+<p>含义：随请求传过来的 cookie</p>
+<p>样例参考值: ZDEDebuggerPresent=php,phtml,php3</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_COOKIE”]</p>
+<p><strong>HTTP_FORWARDED</strong></p>
+<p>含义：用来表示 HTTP 请求端的真实 IP，如果使用代理则为每一级代理设备的 IP，可以被伪造</p>
+<p>样例参考值: client，proxy1，proxy2</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_X_FORWARDED_HOST”]</p>
+<p><strong>HTTP_HOST</strong></p>
+<p>含义：请求中的域名或IP地址，如果端口不为80，则会加上端口号。</p>
+<p>样例参考值：如请求为 <code>www.test.com/index.php</code>，HTTP_HOST 值为 <code>www.test.com</code></p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_HOST”]</p>
+<p><strong>HTTP_PROXY_CONNECTION</strong></p>
+<p>含义：使用代理服务器时会产生，对应的非代理项为 HTTP_CONNECTION。</p>
+<p>样例参考值: 网络连接代理方面的信息。</p>
+<p><strong>HTTP_ACCEPT</strong></p>
+<p>含义：客户端希望接受的数据类型。</p>
+<p>样例参考值: text/html,application/xhtml+xml,application/xml;</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“HTTP_ACCEPT”]</p>
+<h3 id="server-internals-部分参数"><a href="#server-internals-部分参数" class="headerlink" title="server internals 部分参数"></a>server internals 部分参数</h3><p><strong>DOCUMENT_ROOT</strong></p>
+<p>含义：当前运行脚本所在的文档根目录，就是 Apache 配置时写在 <code>&lt;DocumentRoot&gt;</code> 中的值</p>
+<p>样例参考值: D:/web/www</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“DOCUMENT_ROOT”]</p>
+<p><strong>SERVER_ADMIN</strong></p>
+<p>含义：配置中 ServerAdmin 的值，服务器管理员邮箱。</p>
+<p>样例参考值: 默认值为 <a href="mailto:admin@example.com" target="_blank" rel="noopener">admin@example.com</a></p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_ADMIN”]</p>
+<p><strong>SERVER_NAME</strong></p>
+<p>含义：当前运行脚本所在服务器的主机名，配置文件中 SERVER{ } 内 server_name 的值。</p>
+<p>样例参考值: 如请求为 <code>www.test.com/index.php</code>，SERVER_NAME 值为 <code>www.test.com</code></p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_NAME”]</p>
+<p><strong>SERVER_ADDR</strong></p>
+<p>含义：当前运行脚本所在服务器的 IP 地址</p>
+<p>样例参考值: 127.0.0.1 或者 ::1</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_ADDR”]</p>
+<p><strong>SERVER_PORT</strong></p>
+<p>含义：当前 WEB 服务器使用的端口，默认为80</p>
+<p>样例参考值: 80</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_PORT”]</p>
+<p><strong>SERVER_PROTOCOL</strong></p>
+<p>含义：请求页面时通信协议的名称和版本</p>
+<p>样例参考值: HTTP/1.1</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_PROTOCOL”]</p>
+<p><strong>SERVER_SOFTWARE</strong></p>
+<p>含义：服务器名称和版本</p>
+<p>样例参考值: Apache/2.2.11 (Win32) PHP/5.2.9-1</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SERVER_SOFTWARE”]</p>
+<h3 id="connection-amp-request-部分参数"><a href="#connection-amp-request-部分参数" class="headerlink" title="connection &amp; request 部分参数"></a>connection &amp; request 部分参数</h3><p><strong>REMOTE_ADDR</strong></p>
+<p>含义：发起请求的客户端的IP地址</p>
+<p>样例参考值: 127.0.0.1 正在浏览当前页面用户的 IP 地址。</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“REMOTE_ADDR”]</p>
+<p><strong>REMOTE_HOST</strong></p>
+<p>含义：浏览当前页面的用户的主机名。</p>
+<p>样例参考值: 127.0.0.1 </p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“REMOTE_HOST”]</p>
+<p>REMOTE_ADDR 和 REMOTE_HOST 都可能是路由上最后一个 proxy，而不是真实的客户端</p>
+<p><strong>REMOTE_PORT</strong></p>
+<p>含义：用户连接到服务器时所使用的端口</p>
+<p>样例参考值: 2574 (变化的值)</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“REMOTE_PORT”]</p>
+<p><strong>REMOTE_USER</strong></p>
+<p>样例参考值: 发起请求的验证的用户名</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“REMOTE_USER”]</p>
+<p><strong>REMOTE_IDENT</strong></p>
+<p>含义: 发起请求的用户名（支持 IDENT 协议时有用）</p>
+<p><strong>REQUEST_METHOD</strong></p>
+<p>含义：访问页面使用的请求方法</p>
+<p>样例参考值: GET、POST、HEAD、PUT</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“REQUEST_METHOD”]</p>
+<p><strong>SCRIPT_FILENAME</strong></p>
+<p>含义：当前执行脚本的绝对路径</p>
+<p>样例参考值: C:/web/www/index.html</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“SCRIPT_FILENAME”]</p>
+<p><strong>PATH_INFO</strong></p>
+<p>含义：请求中真实脚本名称之后，查询语句（query string）之前的路径信息</p>
+<p>样例参考值: 例如当前 URL 为 <code>http://www.example.com/php/user.php/some/stuff?foo=bar</code>，那么 PATH_INFO 将包含 <code>/some/stuff</code>。</p>
+<p>说明: 相当于PHP中的服务器参数: $_REQUEST[“PATH_INFO”]</p>
+<p><strong>QUERY_STRING</strong></p>
+<p>含义：查询字符串</p>
+<p>样例参考值: a=b&amp;c=d&amp;e=f</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“QUERY_STRING”]</p>
+<p><strong>AUTH_TYPE</strong></p>
+<p>含义：使用 HTTP 认证功能的类型</p>
+<p>说明: 相当于PHP中的服务器参数: $_SERVER[“AUTH_TYPE”]</p>
+<h3 id="date-and-time-部分参数"><a href="#date-and-time-部分参数" class="headerlink" title="date and time 部分参数"></a>date and time 部分参数</h3><p><strong>TIME_YEAR</strong></p>
+<p>样例参考值: 2009</p>
+<p>说明: 服务器获取当前的年份值</p>
+<p><strong>TIME_MON</strong></p>
+<p>样例参考值: 04</p>
+<p>说明: 服务器获取当前的月份值</p>
+<p><strong>TIME_DAY</strong></p>
+<p>样例参考值: 22</p>
+<p>说明: 服务器获取当前的日值</p>
+<p><strong>TIME_HOUR</strong></p>
+<p>样例参考值: 16</p>
+<p>说明: 服务器获取当前时间的小时</p>
+<p><strong>TIME_MIN</strong></p>
+<p>样例参考值: 26</p>
+<p>说明: 服务器获取当前时间的分钟</p>
+<p><strong>TIME_SEC</strong></p>
+<p>样例参考值: 34</p>
+<p>说明: 服务器获取当前时间的秒</p>
+<p><strong>TIME_WDAY</strong></p>
+<p>样例参考值: 3</p>
+<p>说明: 服务器获取当天是星期几, 从星期日-星期六, 数字从 0-6</p>
+<p><strong>TIME</strong></p>
+<p>样例参考值: 20090422162634</p>
+<p>说明: 服务器获取当前的时间, 格式为: 年月日时分秒</p>
+<h3 id="specials-部分参数"><a href="#specials-部分参数" class="headerlink" title="specials 部分参数"></a>specials 部分参数</h3><p><strong>API_VERSION</strong></p>
+<p>样例参考值: 20051115:21</p>
+<p>说明: apache 的 API 版本信息.</p>
+<p><strong>THE_REQUEST</strong></p>
+<p>样例参考值: GET /share77.html HTTP/1.1</p>
+<p>说明: 浏览器发给服务器的请求值. 不包括其他的头信息.</p>
+<p><strong>REQUEST_URI</strong></p>
+<p>样例参考值: /share77.html</p>
+<p>说明: 浏览器请求的资源信息.</p>
+<p><strong>REQUEST_FILENAME</strong></p>
+<p>样例参考值: C:/webRoot/t/share77.html</p>
+<p>说明: 被请求的资源的在磁盘的物理地址.</p>
+<p><strong>IS_SUBREQ</strong></p>
+<p>样例参考值: false</p>
+<p>说明: 如果是 sub-request 则显示为 true, 否则为 false.</p>
+<p><strong>HTTPS</strong></p>
+<p>样例参考值: off</p>
+<p>说明: 如果连接使用 SSL/TLS 模式, 则值为on , 否则值为off, 这个参数比较安全, 即使未载入 mod_ssl 模块</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.sina.com.cn/s/blog_475429950100m01l.html" target="_blank" rel="noopener">Apache Rewrite服务器变量介绍</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/30/Apache-Rewrite服务器变量/" data-id="cjecyyu4z00034cvnvccwd737" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Apache/">Apache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rewrite/">rewrite</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/30/Apache-Rewrite常见实例/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          Apache Rewrite常见实例
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/29/Apache实现伪静态-Rewrite模块学习/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Apache实现伪静态--Rewrite模块学习</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

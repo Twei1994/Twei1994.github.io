@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>ThinkPHP中验证码的用法 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言本篇博客主要说明ThinkPHP中验证码类的使用方法，并不涉及相关实现原理。">
+<meta name="keywords" content="ThinkPHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThinkPHP中验证码的用法">
+<meta property="og:url" content="http://yoursite.com/2016/08/29/ThinkPHP中验证码的用法/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言本篇博客主要说明ThinkPHP中验证码类的使用方法，并不涉及相关实现原理。">
+<meta property="og:image" content="http://box.kancloud.cn/2015-04-18_5531edd1d9e77.png">
+<meta property="og:image" content="http://box.kancloud.cn/2015-04-18_5531edd1ea52c.png">
+<meta property="og:updated_time" content="2016-08-31T07:13:57.303Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ThinkPHP中验证码的用法">
+<meta name="twitter:description" content="前言本篇博客主要说明ThinkPHP中验证码类的使用方法，并不涉及相关实现原理。">
+<meta name="twitter:image" content="http://box.kancloud.cn/2015-04-18_5531edd1d9e77.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ThinkPHP中验证码的用法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/29/ThinkPHP中验证码的用法/" class="article-date">
+  <time datetime="2016-08-29T10:22:56.000Z" itemprop="datePublished">2016-08-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/教程/">教程</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ThinkPHP中验证码的用法
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本篇博客主要说明ThinkPHP中验证码类的使用方法，并不涉及相关实现原理。</p>
+<a id="more"></a>
+<h2 id="基本实现"><a href="#基本实现" class="headerlink" title="基本实现"></a>基本实现</h2><p>首先，我们看一下<a href="http://www.kancloud.cn/manual/thinkphp/1877" target="_blank" rel="noopener">ThinkPHP官方手册</a>中对于验证码使用的介绍。</p>
+<h3 id="生成验证码"><a href="#生成验证码" class="headerlink" title="生成验证码"></a>生成验证码</h3><p>ThinkPHP中的Think\Verify类是用于生成验证码和进行验证的类。</p>
+<p>当我们想要生成验证码时，只要实例化一个该类的对象，并通过entry()函数将生成的验证<br>码图片输出。</p>
+<pre><code>$Verify = new \Think\Verify();
+$Verify = entry();
+</code></pre><h3 id="验证码检测"><a href="#验证码检测" class="headerlink" title="验证码检测"></a>验证码检测</h3><p>可以用Think\Verify类的check方法检测验证码的输入是否正确，下面是手册提供的一个封装好的验证码检测的函数：</p>
+<pre><code>// 检测输入的验证码是否正确，$code为用户输入的验证码字符串
+function check_verify($code, $id = &apos;&apos;){
+    $verify = new \Think\Verify();
+    return $verify -&gt; check($code,$id);
+}
+</code></pre><h3 id="验证码参数设置"><a href="#验证码参数设置" class="headerlink" title="验证码参数设置"></a>验证码参数设置</h3><p>直接通过实例化Verify类生成的验证码图片的参数是ThinkPHP默认的。样子是这样的：</p>
+<p><img src="http://box.kancloud.cn/2015-04-18_5531edd1d9e77.png" alt="默认格式的验证码"></p>
+<p>我们可以调整不同的参数从而获得我们想要的效果。这些参数包括：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>expire</td>
+<td>验证码的有效期（秒）</td>
+</tr>
+<tr>
+<td>useImgBg</td>
+<td>是否使用背景图片 默认为false</td>
+</tr>
+<tr>
+<td>fontSize</td>
+<td>验证码字体大小（像素） 默认为25</td>
+</tr>
+<tr>
+<td>useCurve</td>
+<td>是否使用混淆曲线 默认为true</td>
+</tr>
+<tr>
+<td>useNoise</td>
+<td>是否添加杂点 默认为true</td>
+</tr>
+<tr>
+<td>imageW</td>
+<td>验证码宽度 设置为0为自动计算</td>
+</tr>
+<tr>
+<td>imageH</td>
+<td>验证码高度 设置为0为自动计算</td>
+</tr>
+<tr>
+<td>length</td>
+<td>验证码位数</td>
+</tr>
+<tr>
+<td>fontttf</td>
+<td>指定验证码字体 默认为随机获取</td>
+</tr>
+<tr>
+<td>useZh</td>
+<td>是否使用中文验证码</td>
+</tr>
+<tr>
+<td>bg</td>
+<td>验证码背景颜色 rgb数组设置，例如 array(243, 251, 254)</td>
+</tr>
+<tr>
+<td>seKey</td>
+<td>验证码的加密密钥</td>
+</tr>
+<tr>
+<td>codeSet</td>
+<td>证码字符集合</td>
+</tr>
+<tr>
+<td>zhSet</td>
+<td>验证码字符集合（中文）</td>
+</tr>
+</tbody>
+</table>
+<p>参数的设置有两种方式，可以在实例化时将参数对应的数组传入：</p>
+<pre><code>$congfig = array(
+    &apos;fontSize&apos; =&gt; 30,    //字体大小
+    &apos;length&apos;   =&gt; 3,    //文字的数量
+    &apos;useNoise&apos; =&gt; false,//不使用背景杂点 
+);
+$Verify = new \Think\Verify($config);
+$Verify -&gt; entry();
+</code></pre><p>另外一种方式是动态设置的方式：</p>
+<pre><code>$Verify =     new \Think\Verify();
+$Verify-&gt;fontSize = 30;
+$Verify-&gt;length   = 3;
+$Verify-&gt;useNoise = false;
+$Verify-&gt;entry();
+</code></pre><p>生成的验证码是这样的：</p>
+<p><img src="http://box.kancloud.cn/2015-04-18_5531edd1ea52c.png" alt=""></p>
+<h2 id="常用参数"><a href="#常用参数" class="headerlink" title="常用参数"></a>常用参数</h2><h2 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h2><h3 id="控制器-Controller"><a href="#控制器-Controller" class="headerlink" title="控制器-Controller"></a>控制器-Controller</h3><pre><code>//生成验证码的函数
+public function verify(){
+    //验证码参数设置
+    $config = array(
+        &apos;fontSize&apos; =&gt; 20,
+        &apos;length&apos; =&gt; 5,
+        &apos;useNoise&apos; =&gt; false,
+    );
+    $verify = new \Think\Verify($config);
+    $verifyImg = $verify -&gt; entry();
+}
+</code></pre><p>假设控制器的名称是Login，操作方法是verify()。</p>
+<h3 id="公共函数"><a href="#公共函数" class="headerlink" title="公共函数"></a>公共函数</h3><pre><code>// 验证码检测函数
+function check_verify($code, $id = &apos;&apos;){
+    $verify = new \Think\Verify();
+    return $verify -&gt; check($code,$id);
+}
+</code></pre><p>这个函数可以放在\Common\founction.php中，在验证用户输入验证码的时候指教调用就可以。</p>
+<h3 id="视图-View"><a href="#视图-View" class="headerlink" title="视图-View"></a>视图-View</h3><pre><code>&lt;form method=&apos;post&apos; action=&apos;{:U(&quot;Login/check&quot;)}&apos;&gt;
+    &lt;p&gt;&lt;input type=&quot;text&quot; name=&quot;verify&quot; required&gt;&lt;/p&gt;
+    &lt;p&gt;
+      &lt;img src=&quot;{:U(&apos;Login/verify&apos;)}&quot; id=&apos;verify_img&apos;&gt;
+      &lt;a href=&quot;#&quot; id=&apos;change&apos;&gt;看不清，换一张&lt;/a&gt;
+    &lt;/p&gt;
+    &lt;script&gt;
+      var change = document.getElementById(&apos;change&apos;);
+      var img = document.getElementById(&apos;verify_img&apos;);
+      change.onclick = function (){
+        //增加一个随机参数，防止图片缓存
+        img.src = &quot;{:U(&apos;Login/verify&apos;)}?t=&quot; + new Date();
+        return false;   //阻止超链接的跳转动作
+      }
+    &lt;/script&gt;
+    &lt;button type=&quot;submit&quot;&gt;登录&lt;/button&gt;
+  &lt;/form&gt;
+</code></pre><h3 id="检查用户输入是否正确"><a href="#检查用户输入是否正确" class="headerlink" title="检查用户输入是否正确"></a>检查用户输入是否正确</h3><p>用户输入后，点击登录按钮，执行check操作方法，同样是在Login控制器下。</p>
+<pre><code>public function check(){
+    //首先获得用户输入
+    $code = I(&apos;POST.verify&apos;);
+    if(! check_verify($code)){
+        $this -&gt; error(&apos;验证码输入错误！&apos;);
+    }else{
+        $this -&gt; success(&apos;验证成功！&apos;);
+    }
+}
+</code></pre><h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>这篇博客只是介绍了ThinkPHP中验证码的用法，详细的实现原理见XXX。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/08/29/ThinkPHP中验证码的用法/" data-id="cjecyyua7006f4cvnn9yo4khz" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/08/31/MarkdownPad-2-支持表格/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          MarkdownPad 2 支持表格
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/08/26/Hexo迁移至另外一台电脑/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Hexo迁移至另外一台电脑</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

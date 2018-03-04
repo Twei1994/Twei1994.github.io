@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>虚拟主机及其在Apache和Nginx下的配置 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言这篇博客介绍了什么是虚拟主机以及如何在 Apache 和 Nginx 下配置虚拟主机。">
+<meta name="keywords" content="Apache,Nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟主机及其在Apache和Nginx下的配置">
+<meta property="og:url" content="http://yoursite.com/2017/07/27/虚拟主机及其在Apache和Nginx下的配置/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言这篇博客介绍了什么是虚拟主机以及如何在 Apache 和 Nginx 下配置虚拟主机。">
+<meta property="og:updated_time" content="2017-07-28T14:16:34.084Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="虚拟主机及其在Apache和Nginx下的配置">
+<meta name="twitter:description" content="前言这篇博客介绍了什么是虚拟主机以及如何在 Apache 和 Nginx 下配置虚拟主机。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-虚拟主机及其在Apache和Nginx下的配置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/27/虚拟主机及其在Apache和Nginx下的配置/" class="article-date">
+  <time datetime="2017-07-27T13:26:07.000Z" itemprop="datePublished">2017-07-27</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/教程/">教程</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      虚拟主机及其在Apache和Nginx下的配置
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这篇博客介绍了什么是虚拟主机以及如何在 Apache 和 Nginx 下配置虚拟主机。</p>
+<a id="more"></a>
+<p>服务器配置系列：</p>
+<p><a href="">虚拟主机及其在Apache和Nginx下的配置</a><br><a href="">Nginx正向代理配置</a><br><a href="">Nginx反向代理配置</a><br><a href="">Nginx负载均衡配置</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="什么是虚拟主机"><a href="#什么是虚拟主机" class="headerlink" title="什么是虚拟主机"></a>什么是虚拟主机</h3><p>输入<strong>域名</strong>，打开网页，从网络协议方面看，就是访问某个 <strong>IP</strong> 的主机上的某个<strong>端口</strong>（默认是 80）。从服务器方面看来，就是监听到这个端口的访问时，把某个页面返回给客户端。</p>
+<p>在配置好 Web 服务器后，默认有一个站点，但是我们会有这样的需求：只有一个服务器，但是搭建了多个站点，怎么才能实通过访问不同的域名或者端口实现对不同网站的访问？（具体到服务器里就是不同目录），这个时候就需要设置虚拟主机（VirtualHost）。</p>
+<p>虚拟主机把一台服务器主机分成多个“虚拟”的主机，每台虚拟主机都可以具有独立的域名，具有完整的 Intemet 服务器功能（WWW、FTP、Email等），同一台主机上的虚拟主机之间是完全独立的。从网站访问者来看，每一台虚拟主机和一台独立的主机完全一样。</p>
+<p>利用虚拟主机，不必为每个要运行的网站提供一台单独的 Nginx/Apache 服务器或单独运行一组 Nginx/Apache 进程。虚拟主机提供了在同一台服务器、同一组 Nginx/Apache 进程上运行多个网站的功能，并且网站之间相互独立各不干扰。</p>
+<p>可以这样理解，服务器相当于是一个房子，里面放着站点的内容。这时又想提供一个站点，但是再买一个房子可能不是最好的选择，因为现在的房子还有大部分空着（CPU，内存，带宽）呢。这时最好的选择是将房子分成多个房间，每个房间放一个站点的内容。这就是虚拟主机。</p>
+<p>配置虚拟主机的方式通常有 3 种：基于域名（最常见），基于端口和基于 IP。</p>
+<h3 id="Apache下的配置"><a href="#Apache下的配置" class="headerlink" title="Apache下的配置"></a>Apache下的配置</h3><p>在 Apache 的配置文件 httpd.conf 中去掉 Virtual hosts 配置项前的 #，引入 httpd-vhosts.conf 文件：</p>
+<pre><code># Virtual hosts
+Include conf/extra/httpd-vhosts.conf
+</code></pre><p>以下的配置都在 <code>conf/extra/httpd-vhosts.conf</code> 中完成。</p>
+<p>注：</p>
+<ul>
+<li>修改完配置文件后要重启 Apache 服务才能生效；</li>
+<li>可以通过 <code>httpd -S</code> 来查看已配置的虚拟主机；</li>
+</ul>
+<h4 id="基于域名"><a href="#基于域名" class="headerlink" title="基于域名"></a>基于域名</h4><p>基于域名就是输入不同的域名，访问的是同一服务器上的不同目录。</p>
+<p>因为我们并没有真实注册域名并绑定到本机 IP，我们通过修个 hosts 文件来实现，在 hosts 文件中加入下面这几行：</p>
+<pre><code># Virtual Host Test
+127.0.0.1 domain1.twei.site
+127.0.0.1 domain2.twei.site
+</code></pre><p>配置，在 httpd-vhosts.conf 中加入以下配置：</p>
+<pre><code>&lt;VirtualHost *:80&gt;
+    ServerAdmin tjutwei@163.com
+    ServerName domain1.twei.site
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain1&quot;
+    # 访问权限，可以自己配置
+    &lt;Directory &quot;/www/VirtualHostTest/domain1&quot;&gt;
+　　　　Options Indexes FollowSymLinks
+　　　　AllowOverride None
+　　　　Order allow,deny
+　　　　Allow from all
+　　&lt;/Directory&gt;
+    # 日志配置
+    # ErrorLog logs/ error_log
+    # TransferLog logs/ access_log
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:80&gt;
+    ServerAdmin tjutwei@163.com
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain2&quot;
+    ServerName domain2.twei.site
+&lt;/VirtualHost&gt;
+</code></pre><p>上面的配置实现了输入域名 <code>domain1.twei.site</code> 时访问 <code>D:/web/www/VirtualHostTest/domai1</code>，输入域名 <code>domain2.twei.site</code> 时访问 <code>D:/web/www/VirtualHostTest/domai2</code>。</p>
+<p>在使用虚拟主机后，默认的站点为第一个虚拟主机，如果输入不是特定的域名，而是其它的例如 <code>localhost</code>时，访问的是 <code>D:/web/www/VirtualHostTest/domai1</code> 这个目录而不是之前配置的 <code>DocumentRoot</code>。</p>
+<p>注：在 Apache2.4 版本之后，<code>NameVirtualHost</code> 配置项已失效，如果在 httpd-vhosts.conf 中使用了该配置，在重启 Apache 服务时会提示如下错误：</p>
+<pre><code>NameVirtualHost has no effect and will be removed in the next release /usr/local/apache/conf/extra/httpd-vhosts.conf:23
+</code></pre><h4 id="基于端口"><a href="#基于端口" class="headerlink" title="基于端口"></a>基于端口</h4><p>基于端口就是输入不同的端口，访问的是同一服务器上的不同目录。</p>
+<p>对 httpd.conf 中增加监听端口：</p>
+<pre><code>Listen 80
+Listen 81
+</code></pre><p>在 httpd-vhost.conf 中添加如下配置：</p>
+<pre><code>&lt;VirtualHost *:80&gt;
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain1&quot;
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:81&gt;
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain2&quot;
+&lt;/VirtualHost&gt;
+</code></pre><p>注：不要添加 ServerName 字段；<code>&lt;Directory&gt;</code> 和日志配置可以选填；</p>
+<p>上面的配置实现了输入域名 <code>localhost:80</code> 时访问 <code>D:/web/www/VirtualHostTest/domai1</code>，输入域名 <code>localhost:81</code> 时访问 <code>D:/web/www/VirtualHostTest/domai2</code>。</p>
+<h4 id="域名和端口的混合使用"><a href="#域名和端口的混合使用" class="headerlink" title="域名和端口的混合使用"></a>域名和端口的混合使用</h4><p>也可以混合使用域名和端口，实现类似下面的功能：</p>
+<pre><code>domain1.twei.stie:80  =====&gt;  /www/VirtualHostTest/domai1
+domain1.twei.stie:81  =====&gt;  /www/VirtualHostTest/domai2
+</code></pre><p>相关的配置如下：</p>
+<p>httpd.conf</p>
+<pre><code>Listen 80
+Listen 81
+</code></pre><p>httpd-vhost.conf</p>
+<pre><code>&lt;VirtualHost *:80&gt;
+    ServerName domain1.twei.site
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain1&quot;
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:81&gt;
+    ServerName domain2.twei.site
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain2&quot;
+&lt;/VirtualHost&gt;
+</code></pre><p>实现的效果如下：</p>
+<pre><code>domain1.twei.stie:80  =====&gt;  /www/VirtualHostTest/domai1
+domain1.twei.stie:80  =====&gt;  /www/VirtualHostTest/domai1
+domain1.twei.stie:81  =====&gt;  /www/VirtualHostTest/domai2
+domain1.twei.stie:81  =====&gt;  /www/VirtualHostTest/domai2
+</code></pre><p>通过 <code>httpd -S</code> 查看：</p>
+<pre><code>*:80                   domain1.twei.site
+*:81                   domain2.twei.site
+</code></pre><p>80 端口的默认站点为 <code>domain1.twei.site</code> 对应的站点，81 端口的默认站点为 <code>domain2.twei.site</code> 对应的站点。</p>
+<h4 id="基于IP"><a href="#基于IP" class="headerlink" title="基于IP"></a>基于IP</h4><p>将不同的网站挂在不同的 IP 上，访问不同的 IP，所看到的是不同网站。</p>
+<p>因为一般服务器没那么多公网 IP，而且用户一般都是用域名访问的。所以这个不常用，但是可以用来测试和学习。</p>
+<p>配置就是将 <code>&lt;VirtualHost&gt;</code> 中添加上 IP 地址：</p>
+<pre><code>&lt;VirtualHost 192.168.0.111&gt;
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain1&quot;
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost 192.168.0.112&gt;
+    DocumentRoot &quot;D:/web/www/VirtualHostTest/domain2&quot;
+&lt;/VirtualHost&gt;
+</code></pre><p>注：如果在重启服务时出现下面的错误，加上 ServerName，任意名称均可。</p>
+<pre><code>Failed to resolve server name for 192.168.1.115 (check DNS) -- or specify an explicit ServerName
+</code></pre><h3 id="Nginx下的配置"><a href="#Nginx下的配置" class="headerlink" title="Nginx下的配置"></a>Nginx下的配置</h3><p>Nginx 下一个 server 就是一个虚拟主机，所以要配置虚拟主机只要增加 http 下的 server 即可。</p>
+<h4 id="基于域名-1"><a href="#基于域名-1" class="headerlink" title="基于域名"></a>基于域名</h4><p>首先还是修改 hosts 文件，Ubuntu 的 hosts 文件位于 /etc/hosts，在末尾添加：</p>
+<pre><code># Virtual Host Test
+127.0.0.1 domain1.twei.site
+127.0.0.1 domain2.twei.site
+</code></pre><p>然后修改 nginx.conf，增加以下配置：</p>
+<pre><code>server {  
+       listen       80;  
+       server_name  domain1.twei.site;  
+       #charset koi8-r;  
+       #access_log  logs/host.access.log  main;  
+       location / {  
+           root   html/domain1;  
+           index  index.html index.htm;  
+       }  
+}   
+server {  
+       listen       80;  
+       server_name  domain2.twei.site;  
+       #charset koi8-r;  
+       #access_log  logs/host.access.log  main;  
+       location / {  
+           root   html/domain2;  
+           index  index.html index.htm;  
+       }  
+}   
+</code></pre><p>然后通过 <code>/usr/local/nginx/sbin/nginx -s reload</code> 重启 Nginx 服务。</p>
+<p>通过浏览器可以验证，域名 <code>domain1.twei.site</code> 的根目录为 <code>/usr/local/nginx/html/domain1</code>，而域名 <code>domain2.twei.site</code> 的根目录为 <code>/usr/local/nginx/html/domain2</code>。</p>
+<p>注：与 Apache 不同的是，现在 <code>localhost</code> 仍然对应 <code>/usr/local/nginx/html/</code><br>这个路径。原因是我们没有修改之前的 server 配置。</p>
+<h4 id="基于端口-1"><a href="#基于端口-1" class="headerlink" title="基于端口"></a>基于端口</h4><p>修改 nginx.conf，增加如下配置：</p>
+<pre><code>server {  
+        listen       80;  
+        server_name  localhost;  
+        #charset koi8-r;  
+        #access_log  logs/host.access.log  main;  
+        location / {  
+            root   html/domain1;  
+            index  index.html index.htm;  
+        }         
+}  
+server {  
+        listen       81;  
+        server_name  localhost;  
+        #charset koi8-r;  
+        #access_log  logs/host.access.log  main;  
+        location / {  
+            root   html/domain2;  
+            index  index.html index.htm;  
+        }          
+}
+</code></pre><p>上面的配置实现了通过 80 端口访问的是 <code>/usr/local/nginx/html/domain1</code>，通过 81 端口访问的是 <code>/usr/local/nginx/html/domain2</code>。</p>
+<p>当然，Nginx 也可以混合使用基于域名和端口的虚拟主机配置。   </p>
+<h4 id="基于IP-1"><a href="#基于IP-1" class="headerlink" title="基于IP"></a>基于IP</h4><p>首先，需要我们给本机增加一个虚拟网卡，从而让本机有多个 IP。</p>
+<p>通过 <code>ifconfig</code> 可以查看本机的 IP，目前我的电脑 IP 是 <code>192.168.1.116</code>，然后通过 <code>ifconfig eth0:0 192.168.1.117 netmask 255.255.240.0 up</code> 就给本机增加了一个名称为 eth0:0 的虚拟网卡，它的 IP 为 <code>192.168.1.117</code>。</p>
+<p>接下来配置 nginx.conf，增加另外两个 server 节点：</p>
+<pre><code>server {  
+        listen       80;  
+        server_name  192.168.1.116;  
+        #charset koi8-r;  
+        #access_log  logs/host.access.log  main;  
+        location / {  
+            root   html/domain1;  
+            index  index.html index.htm;  
+        }         
+    }  
+
+server {  
+        listen       80;  
+        server_name  192.168.1.117;  
+        #charset koi8-r;  
+        #access_log  logs/host.access.log  main;  
+        location / {  
+            root   html/domain2;  
+            index  index.html index.htm;  
+        }          
+    }
+</code></pre><p>这就是实现了在同一台硬件服务器上，虚拟出两个 IP 地址，使用 1 个 nginx 服务器，分别对两个 IP 进行访问，分别跳转到不同的 html 页面。  </p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.cnblogs.com/hi-bazinga/archive/2012/04/23/2466605.html" target="_blank" rel="noopener">Apache 配置虚拟主机三种方式</a></p>
+<p><a href="http://yahoon.blog.51cto.com/13184/36239/" target="_blank" rel="noopener">深入理解Apache虚拟主机</a></p>
+<p><a href="http://blog.csdn.net/yueaini10000/article/details/72354286" target="_blank" rel="noopener">Nginx实现多虚拟主机配置</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/27/虚拟主机及其在Apache和Nginx下的配置/" data-id="cjecyyucd008r4cvnq8m2ydw3" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Apache/">Apache</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/">Nginx</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/27/飞花令/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          飞花令
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/25/127-0-0-1-localhost和本机IP三者的区别/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">127.0.0.1,localhost和本机IP三者的区别</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

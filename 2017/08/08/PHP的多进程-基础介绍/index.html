@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>PHP的多进程--基础介绍 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+<meta name="keywords" content="PHP,进程,pcntl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP的多进程--基础介绍">
+<meta property="og:url" content="http://yoursite.com/2017/08/08/PHP的多进程-基础介绍/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+<meta property="og:updated_time" content="2017-08-08T09:57:23.360Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP的多进程--基础介绍">
+<meta name="twitter:description" content="前言PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com，欢迎各位来信讨论相关问题。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-PHP的多进程-基础介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/08/PHP的多进程-基础介绍/" class="article-date">
+  <time datetime="2017-08-08T06:55:15.000Z" itemprop="datePublished">2017-08-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础教程/">基础教程</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP的多进程--基础介绍
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>PHP 的多进程系列，记录我对 PHP 多进程的学习和理解。这里写的内容可能会有错误，希望各位发现后不吝指正，谢谢。</p>
+<p>我的邮箱是: <a href="mailto:tjutwei@163.com" target="_blank" rel="noopener">tjutwei@163.com</a>，欢迎各位来信讨论相关问题。</p>
+<a id="more"></a>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="">PHP的多进程–基础介绍</a></p>
+<p><a href="">PHP的多进程–防止僵尸进程</a></p>
+<p><a href="">PHP的多进程–共享数据</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>PHP 的设计目的就是用来快速地开发 WEB 应用，这也注定了它在某些方面的先天不足，例如在 CLI 环境下处理大量数据的情况，或者在并发编程方面，都显得力不从心。</p>
+<p>虽然 PHP 本身不支持多进程，但基于 Linux 的 PHP 扩展 PCNTL 却可以提供多进程编程，大大提高了 PHP 的效率，可以让 PHP 实现一些复杂度高的任务。</p>
+<blockquote>
+<p>注：PHP 的多进程是在 CLI 下执行的，不适合在 Web 服务器上处理请求。</p>
+</blockquote>
+<h3 id="PCNTL"><a href="#PCNTL" class="headerlink" title="PCNTL"></a>PCNTL</h3><h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>pcntl 是用于实现 PHP 多进程编程的扩展，只能在 Linux/Unix 下安装，所以不能通过它实现 Windows 下的多进程。</p>
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>有以下两种安装方式，根据 PHP 的安装方式来选择：</p>
+<ul>
+<li>重新编译安装 PHP</li>
+</ul>
+<p>重新编译安装 PHP，在 configure 时，加入 <code>--enable-pcntl</code> 配置来打开并启动 pcntl 扩展；</p>
+<ul>
+<li>通过phpize</li>
+</ul>
+<p>如果不想重新编译安装 PHP，可以利用 phpize 来动态安装，分为以下几步：</p>
+<ol>
+<li>通过执行 <code>phpize</code> 来检查是否安装了 phpize，如果没安装则执行 <code>yum install php_devel</code> 来安装 phpize 指令，并记录它的目录（如 phpize 在我这里的目录位于 /usr/local/php/bin/phpize）；</li>
+<li>去 php.net 下载相应版本的 php 源文件；</li>
+<li>解压源文件，并进入 pcntl 扩展目录下 <code>cd /usr/local/php/ext/pcntl</code>；</li>
+<li>执行 phpize 命令 <code>/usr/local/php/bin/phpize</code>，执行完会生成 configure 文件；</li>
+<li>执行 <code>./configure --with-php-config=/usr/local/php/bin/php-config</code>，其中 /usr/local/php 是 PHP 的安装目录；</li>
+<li>编译和安装 <code>make &amp;&amp; make install</code>，执行成功后会在 PHP 扩展的目录下生成一个 pcntl.so 的文件；</li>
+<li>编辑 PHP 配置文件 /usr/local/php/etc/php.ini，加入 <code>extension=pcntl.so</code>;</li>
+<li>重启 PHP 环境，重启 Web 服务器；</li>
+</ol>
+<h4 id="查看"><a href="#查看" class="headerlink" title="查看"></a>查看</h4><ul>
+<li><p>通过 <code>php -m</code> 可以查看 PHP 当前应用的扩展，里面有 pcntl 说明该扩展已经应用；</p>
+</li>
+<li><p>也可以用 <code>php -r &quot;echo pcntl_fork();&quot;</code> 来执行 pcntl 扩展提供的函数来查看扩展是否成功启动，返回一个正整数说明成功；</p>
+</li>
+</ul>
+<h3 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h3><p>安装好了扩展，终于可以实践了。先给出最重要的一个函数：</p>
+<blockquote>
+<p>pcntl_fork</p>
+</blockquote>
+<blockquote>
+<p>pcntl_fork() 函数创建一个子进程，这个子进程仅有 PID（进程号）和 PPID（父进程号）与其父进程不同，其他的都相同。</p>
+</blockquote>
+<blockquote>
+<p>返回值：成功时，在父进程执行线程内返回产生的子进程的 PID，在子进程执行线程内返回 0。失败时，在父进程上下文返回 -1，不会创建子进程，并且会引发一个 PHP 错误。</p>
+</blockquote>
+<h4 id="实例1–创建单个子进程"><a href="#实例1–创建单个子进程" class="headerlink" title="实例1–创建单个子进程"></a>实例1–创建单个子进程</h4><pre><code>&lt;?php
+// 创建子进程
+$pid = pcntl_fork();
+if($pid == -1){
+    // 返回值为-1，创建失败
+    die(&apos;could not fork&apos;);
+}elseif($pid){
+    // 返回值大于0，是父进程
+    echo &quot;parent \t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+}else{
+    // 返回值等于0，是子进程
+    echo &quot;child \t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+}
+?&gt;
+</code></pre><p>如果通过 pcntl_fork 创建子进程成功的话，系统就有了2个进程，一个为父进程，一个为子进程，子进程的 id 号为 $pid。</p>
+<p>当系统运行到 <code>$pid = pcntl_fork();</code> 时，会这个地方进行分支，父子进程各自开始运行各自的程序代码。</p>
+<p>上面的代码，输出结果为：</p>
+<pre><code>parent     08:49:18
+child     08:49:18
+</code></pre><p>也许你很奇怪，为什么一个 if 和 else 互斥的代码中，都输出了结果？</p>
+<p>这恰恰说明了有两个进程在执行后面的代码。父进程的变量 $pid 值大于 0，所以执行 elseif 中的代码，子进程的变量 $pid 值等于 0，就会执行 else 中的代码。</p>
+<p>至于谁先谁后的问题，这得要看系统资源的分配了。</p>
+<h4 id="实例2–创建多个子进程"><a href="#实例2–创建多个子进程" class="headerlink" title="实例2–创建多个子进程"></a>实例2–创建多个子进程</h4><p>当我们希望创建多个子进程时，可以使用循环，在循环内部使用 pcntl_fork 函数。</p>
+<pre><code>&lt;?php
+// 创建子进程
+for ($i = 0; $i &lt; 2; $i++) { 
+    $pid = pcntl_fork();
+    if($pid == -1){
+        // 返回值为-1，创建失败
+        die(&apos;could not fork&apos;);
+    }elseif($pid){
+        // 返回值大于0，是父进程
+        echo &quot;parent \t&quot;, getmypid(), &quot;\t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+    }else{
+        // 返回值等于0，是子进程
+        echo &quot;child \t&quot;, getmypid(), &quot;\t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+    }
+}
+?&gt;
+</code></pre><p>通过 <code>getmypid()</code> 函数可以得到当前进程的进程 id（pid），可以帮助我们查看进程的个数。</p>
+<p>上面的代码循环的次数为 2，所以创建了 2 个子进程。如果你是这样想的，那就大错特错了。它的执行结果是这样的：</p>
+<pre><code>parent     7221    09:03:41
+parent     7221    09:03:41
+child     7223    09:03:41
+child     7222    09:03:41
+parent     7222    09:03:41
+child     7224    09:03:41
+</code></pre><p>从结果可以看到，这段代码执行时一共产生了 4 个不同的进程，其中一个（7222）既是父进程，又是子进程。和我们想的一个父进程加 2 个子进程相差比较大。</p>
+<p>这是为什么呢？还是没有深刻理解子进程的概念。</p>
+<p>当 fork 出来子进程后，它就与父进程完成独立了，并保持着之前的执行状态。从上面的结果可以推断出，当（$i == 0）第一次循环时，父进程为 7221，通过 fork 它得到了一个子进程 7222，它们分别执行各自的代码，输出 <code>parent     7221    09:03:41</code> 和 <code>child     7222    09:03:41</code>；然后 7221 进程继续执行第二次循环，同时，<strong>7222 进程也会执行第二次循环</strong>，因为它的执行状态和父进程是一样的。它们作为父进程 fork 出来了 7223 和 7224 两个子进程，从而又输出了 4 条结果。</p>
+<h4 id="实例3–创建多个子进程"><a href="#实例3–创建多个子进程" class="headerlink" title="实例3–创建多个子进程"></a>实例3–创建多个子进程</h4><p>理解了原因之后，我们可以得到上面方法的一个缺点：循环未结束，子进程会不停的创建子进程，可能造成系统资源被耗尽的情况。</p>
+<p>所以，一般子进程代码运行完成后，要加入 <code>exit</code> 来确保子进程正常退出。</p>
+<p>那么上面的代码可以修改成这样的：</p>
+<pre><code>&lt;?php
+for ($i=0; $i &lt; 2; $i++) {
+    $pid = pcntl_fork();
+    if($pid == -1){
+        // 返回值为-1，创建失败
+        die(&apos;could not fork&apos;);
+    }elseif($pid){
+        // 返回值大于0，是父进程
+        echo &quot;parent \t&quot;,posix_getppid(),&quot;\t&quot;, getmypid(), &quot;\t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+    }else{
+        // 返回值等于0，是子进程
+        echo &quot;child \t&quot;,posix_getppid(),&quot;\t&quot;, getmypid(), &quot;\t&quot;, date(&quot;H:i:s&quot;, time()), &quot;\n&quot;;
+        exit;
+    }
+}
+</code></pre><p>通过 <code>posix_getppid()</code> 可以得到当前进程的父进程，我们把它放在输出中。这次的输出结果是：</p>
+<pre><code>parent     2366    7470    09:35:48
+parent     2366    7470    09:35:48
+child     7470    7472    09:35:48
+child     7470    7471    09:35:48
+</code></pre><p>可以看到，这次只有 3 个进程，每个循环中， 父进程 7470 都创建了一个子进程。在实际项目中，要采用这种方式，即在子进程的执行代码最后添加 exit，而不是实例 2 的形式。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.jb51.net/article/71232.htm" target="_blank" rel="noopener">深入探究PHP的多进程编程方法</a></p>
+<p><a href="http://php.net/manual/zh/function.pcntl-fork.php" target="_blank" rel="noopener">pcntl_fork</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/08/PHP的多进程-基础介绍/" data-id="cjecyyu8w00514cvne6atsase" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/进程/">进程</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/08/PHP的多进程-防止僵尸进程/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP的多进程--防止僵尸进程
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/06/进程与线程的区别/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">进程与线程的区别</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

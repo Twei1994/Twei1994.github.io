@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MySQL索引详解 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言索引，是MySQL中很重要的一个知识点，在面试中也经常会被问到。之前对于索引的理解太粗浅，相关问题总是在死记硬背。现在仔细学习了下MySQL中索引的相关知识，发现许多问题都迎刃而解了。所以，学习知识到了一定程度，还是要从底层开始理解。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL索引详解">
+<meta property="og:url" content="http://yoursite.com/2017/09/18/MySQL索引详解/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言索引，是MySQL中很重要的一个知识点，在面试中也经常会被问到。之前对于索引的理解太粗浅，相关问题总是在死记硬背。现在仔细学习了下MySQL中索引的相关知识，发现许多问题都迎刃而解了。所以，学习知识到了一定程度，还是要从底层开始理解。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/phone-book.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/BST.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/AV.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Btree.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Btree2.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/B+tree.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/innodb.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/innodb_secondary.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/MyISAM_primary.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/MyISAM_secondary_key.jpg">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/auto_increment_id.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/not_autoincrement_key.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/combine_key.png">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Combine.png">
+<meta property="og:updated_time" content="2017-09-19T14:18:29.133Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL索引详解">
+<meta name="twitter:description" content="前言索引，是MySQL中很重要的一个知识点，在面试中也经常会被问到。之前对于索引的理解太粗浅，相关问题总是在死记硬背。现在仔细学习了下MySQL中索引的相关知识，发现许多问题都迎刃而解了。所以，学习知识到了一定程度，还是要从底层开始理解。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/phone-book.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-MySQL索引详解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/18/MySQL索引详解/" class="article-date">
+  <time datetime="2017-09-18T13:21:21.000Z" itemprop="datePublished">2017-09-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL索引详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>索引，是MySQL中很重要的一个知识点，在面试中也经常会被问到。之前对于索引的理解太粗浅，相关问题总是在死记硬背。现在仔细学习了下MySQL中索引的相关知识，发现许多问题都迎刃而解了。所以，学习知识到了一定程度，还是要从底层开始理解。</p>
+<a id="more"></a>
+<h3 id="相关问题"><a href="#相关问题" class="headerlink" title="相关问题"></a>相关问题</h3><p>这里列出几个有关于MySQL索引的问题：</p>
+<ol>
+<li>MySQL的索引有什么作用？可以分成几类？</li>
+<li>InnoDB的索引和MyISAM的索引有什么区别？</li>
+<li>InnoDB为什么要有主键？</li>
+<li>InnoDB的主键选哪种类型的字段性能最好？</li>
+<li>组合索引什么时候生效，什么时候失效？</li>
+<li>为什么使用<code>like &quot;%ABC%&quot;</code>索引会失效而<code>like &quot;ABC%&quot;</code>不会呢？</li>
+</ol>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="为什么要使用数据库"><a href="#为什么要使用数据库" class="headerlink" title="为什么要使用数据库"></a>为什么要使用数据库</h3><p>要说索引，首先要从数据库说起。有没有想过，我们为什么要使用数据库？没有数据库的时候，大家再用什么存放数据？</p>
+<p>首先回答第二个问题，如果不用数据库，还可以用什么存数据？我能想到的有以下几种方式：</p>
+<ul>
+<li>文本文件（.txt、.INI等）</li>
+<li>XML、JSON文件</li>
+<li>电子数据表（Excel表）</li>
+</ul>
+<p>它们各有优势，例如文本文档结构简单，XML和JSON文件对于分级数据比较友好，电子数据表可以进行某些简单的统计操作等。</p>
+<p>说到底，不管以什么方式存放数据，我们的最终目标都是<strong>希望可以快速地对数据进行增、删、改、查操作</strong>，另外如果<strong>占用资源少</strong>就更好了。</p>
+<p>在数据量比较小的时候，上面的这些方式看起来都还行。但是当数据量很大时，它们的缺点也很明显：</p>
+<ol>
+<li>数据的存储会有大量冗余（浪费磁盘空间）；</li>
+<li>查找（修改和删除的瓶颈也在查找）困难，速度很慢（需要一行一行的将文件读进来）；</li>
+</ol>
+<p>为了解决这些问题，就得使用数据库。数据库可以帮我们将大量数据组织起来，按照某种方式存到计算机中。那么，数据库（这里指关系型数据库）是怎么解决上面的两个问题的呢？</p>
+<ol>
+<li>通过多张表加上主键、外键的关联来解决数据存储冗余的问题；</li>
+<li>通过增加<strong>索引</strong>来提高查询速度；</li>
+</ol>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>那么，索引是什么？为什么能提高查找速度？</p>
+<blockquote>
+<p>在关系数据库中，索引是一种单独的、物理的对数据库表中一列或多列的值进行排序的一种存储结构，它是某个表中一列或若干列值的集合和相应的指向表中物理标识这些值的数据页的逻辑指针清单。</p>
+</blockquote>
+<p>通俗地说，索引就是目录。将数据库中的内容看成一本书，索引就是书的目录。我们要在字典里面查某个字，如“喵”，肯定不会一页一页地翻，看这一页有没有这个字，而是先看目录，找到拼音第一个是 m 的字的页码范围，然后在这个范围内继续找。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/phone-book.jpg" alt="电话本目录"></p>
+<p>数据库的内容是存储在计算机的硬盘上的（如MyISAM的.frm、.MYD、.MYI文件）。我们使用数据库处理数据时，需要从硬盘中找到目标记录，并将它调入内存中。和字典类似，硬盘结构上也是分页的。它将所有的空间分成大小相等（可能是211到214字节）的页面，每次读取硬盘上的内容都以页为单位。</p>
+<p>为了能够<strong>快速地从硬盘中得到存放目标数据的页，尽可能地减少对硬盘的访问</strong>，我们也需要一个目录，在数据库中，这个目录就被称为索引。</p>
+<p>MySQL中的索引是通过<strong>B+树</strong>这种数据结构实现的。</p>
+<h3 id="从二叉排序树到B-树"><a href="#从二叉排序树到B-树" class="headerlink" title="从二叉排序树到B+树"></a>从二叉排序树到B+树</h3><p>我们都知道，二叉排序树（Binary Sort Tree/Binary Search Tree, BST）的查找效率很高，平均复杂度为O(logN)。但是当二叉排序树不平衡时（如最差时，仅有左子树或右子树），它的查找效率就变低了。如下图右边的BST中，我们要查找元素99，时间复杂度为O(N)。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/BST.png" alt="BST"></p>
+<p>所以我们希望二叉排序是平衡的，也就是每个节点的左子树和右子树的高度差至多等于1，这样的树就是平衡二叉树（Self-Blancing Binary Search Tree）。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/AV.png" alt="AVL"></p>
+<p>如果我们的数据很多时，使用平衡二叉树时树的高度会很高。所以，通常会使用另外一种平衡二叉树的变种，多路查找树（Multi-way Search Tree），它的每个节点的孩子数可以有多个，并且每个节点可以存储多个元素，也被称为B树（这里的B指的是Blance，而不是Binary）。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Btree.png" alt="B-Tree"></p>
+<p>这样，我们可以降低树的高度，通过高度为2~3的B树来存储所有的数据页（实际上，MySQL的B+树的高度也在2~3之间）。但是B树也不是最完美的，如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Btree2.png" alt="B-Tree"></p>
+<p>假设每个节点都存储在一个数据页上，当我们需要遍历这棵B树时，我们的路径是这样的：page2 -&gt; page1 -&gt; page3 -&gt; page1 -&gt; page4 -&gt; page1 -&gt; page5。我们每次切换节点时，都要重新载入根节点所在的数据页，这就不太好。有没有更高效的方式呢？</p>
+<p>答案就是B+树，它能够实现高效地遍历树的所有元素。它的结构如下图所示：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/B+tree.png" alt="B+Tree"></p>
+<p>它将根节点的关键字在叶子节点再次列出，并将所有的叶子节点都连接起来。B+数的叶节点包含了全部的关键字，并且按照顺序排列，非叶节点中存储着它的子树中最大（或最小）的关键字，仅作为索引使用。</p>
+<p>B+树的好处就在于，如果是要随机查找，我们就从根结点出发，与B树的查找方式相同，只不过即使在分支结点找到了待查找的关键字，也只是用来索引，不提供实际记录的访问，还是需要到达包含此关键字的叶结点。</p>
+<p>如果我们是需要从最小关键字进行从小到大的顺序查找，我们就可以从最左侧的叶子结点出发，不经过分支结点，而是延着指向下一叶子的指针就可遍历所有的关键字。所以B+树适合带有范围的查找。</p>
+<p>下面就以MySQL存储以下数据为例，来说明在InnoDB和MyISAM中索引的应用以及它们的不同之处。</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Score</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15</td>
+<td>34</td>
+<td>Bob</td>
+</tr>
+<tr>
+<td>18</td>
+<td>77</td>
+<td>Alice</td>
+</tr>
+<tr>
+<td>20</td>
+<td>5</td>
+<td>Jim</td>
+</tr>
+<tr>
+<td>30</td>
+<td>91</td>
+<td>Eric</td>
+</tr>
+<tr>
+<td>49</td>
+<td>22</td>
+<td>Tom</td>
+</tr>
+<tr>
+<td>50</td>
+<td>89</td>
+<td>Rose</td>
+</tr>
+</tbody>
+</table>
+<h3 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h3><p>不同于MyISAM，InnoDB的数据和索引存在一起，也就是它的主键索引是聚簇索引（Clustered Index）。</p>
+<p>在使用InnoDB作为存储引擎时，我们需要指定一个主键。如果没有主键，但是有唯一索引（非NULL），就将该唯一索引作为主键。如果既没有指定主键也没有唯一索引，会自动生成一个长度为6字节的ROWID，将它作为主键（隐含，外部不可见）。所以InnoDB的表必须要有一个主键才行。</p>
+<p>这是为什么呢？是因为在InnoDB中，<strong>数据文件本身要按主键聚集，表数据文件本身就是一棵B+树</strong>。这棵树的叶节点保存着所有的数据记录，并且是以表的主键构造的，因此InnoDB表必须有主键。如果没有主键，就不能存数据。</p>
+<h4 id="主键索引"><a href="#主键索引" class="headerlink" title="主键索引"></a>主键索引</h4><p>下图是InnoDB对上述数据的存储结构（以ID列为主键）：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/innodb.jpg" alt="InnoDB_primary_key"></p>
+<p>可见看到，整个数据文件就是一棵B+树。要存储的每条记录按照主键值由小到大，存放在叶节点中，非叶节点使用主键值作为划分标准。这样在进行主键查询时，速度会很快。</p>
+<h4 id="辅助索引"><a href="#辅助索引" class="headerlink" title="辅助索引"></a>辅助索引</h4><p>在使用中，除了主键这一个索引之外，我们还会在其他字段上设置索引，加快以该字段为查询条件的SQL的执行效率。这些非主键字段上的索引被称为辅助索引（Secondary Key）。以第3列为例，增加索引，它的存储结构如下：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/innodb_secondary.jpg" alt="InnoDB_Secondary_Key"></p>
+<p>InnoDB的辅助索引与主键索引基本类似，不同之处在于它的叶节点中，<strong>保存的是主键值</strong>而不是整条记录。所以，在查询时，会分成两步：首先检索辅助索引获得主键，然后用主键到主索引中检索获得记录。</p>
+<h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><p>MyISAM用的是非聚簇索引（Unclustered Index），也没有必须要有主键的要求。它的数据文件放在.MYD中，索引文件放在.MYI中。MyISAM的索引也是采用B+树实现的，它的叶节点内容是一个指针，指向数据真正的位置。</p>
+<h4 id="主键索引-1"><a href="#主键索引-1" class="headerlink" title="主键索引"></a>主键索引</h4><p>下图是MyISAM主键索引的原理图：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/MyISAM_primary.jpg" alt="MyISAM_primary_key"></p>
+<p>可以看到，数据内容和索引内容是分开存放的，通过索引的值来获取到数据存放的地址，然后在取放在该地址的数据。</p>
+<h4 id="辅助索引-1"><a href="#辅助索引-1" class="headerlink" title="辅助索引"></a>辅助索引</h4><p>在MyISAM中，主索引和辅助索引在结构上没有任何区别，只是主键索引要求字段值是唯一的，而辅助索引的字段值可以重复。假如在Score字段上建立一个辅助索引，则此索引的结构如下图所示：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/MyISAM_secondary_key.jpg" alt="MyISAM_secondary_key"></p>
+<p>同样也是一棵B+树，子节点保存数据记录的地址。因此，MyISAM中索引检索的算法为首先按照B+树搜索索引，找到数据存放的地址，然后根据地址读取相应数据记录。</p>
+<h2 id="问题解答"><a href="#问题解答" class="headerlink" title="问题解答"></a>问题解答</h2><p>看到这里，博客开头的问题应该都可以解决了：</p>
+<h3 id="MySQL的索引有什么作用？可以分成几类？"><a href="#MySQL的索引有什么作用？可以分成几类？" class="headerlink" title="MySQL的索引有什么作用？可以分成几类？"></a>MySQL的索引有什么作用？可以分成几类？</h3><p>答：MySQL索引的作用是为了提高数据查询的速度，也就是尽可能快得从磁盘上取出目标数据所在的页，采用是数据结构是B+树。它可以分成两类，一类是聚簇索引，另一类是非聚簇索引。</p>
+<h3 id="InnoDB的索引和MyISAM的索引有什么区别？"><a href="#InnoDB的索引和MyISAM的索引有什么区别？" class="headerlink" title="InnoDB的索引和MyISAM的索引有什么区别？"></a>InnoDB的索引和MyISAM的索引有什么区别？</h3><p>答：InnoDB的索引属于聚簇索引，MyISAM的索引属于非聚簇索引。</p>
+<h3 id="InnoDB为什么要有主键？"><a href="#InnoDB为什么要有主键？" class="headerlink" title="InnoDB为什么要有主键？"></a>InnoDB为什么要有主键？</h3><p>答：因为没有主键就没法存数据。（之前，总是以为，要先把数据存好，然后再根据需要加索引。对于MyISAM是这样，但InnoDB就不是先有数据，再加索引。）InnoDB的数据文件本身就是一个主键索引，它的建立必须依赖主键。所以，没有主键就没法存数据。实际上，如果没有指定主键，InnoDB会采用一个值唯一的字段来作为主键，如果没有唯一索引，则会自己生成一个隐含的ROWID来作为主键。</p>
+<h3 id="InnoDB的主键选哪种类型的字段性能最好？"><a href="#InnoDB的主键选哪种类型的字段性能最好？" class="headerlink" title="InnoDB的主键选哪种类型的字段性能最好？"></a>InnoDB的主键选哪种类型的字段性能最好？</h3><p>答：最好是采用一个自增ID作为主键。有两个点：一是自增（也就是单调）；二是ID，也就是字段值尽可能小。</p>
+<p>为什么要用自增（或者）单调的字段作为主键呢？这是由于B+树的结构的决定的，如下图所示，使用自增主键，每次添加新的记录时，直接添加到当前节点的后续位置即可，当前页如果满了，自动开辟一个新的页即可。这样就会形成一个紧凑的索引结构，近似顺序填满。由于每次插入时也不需要移动已有数据，因此效率很高，也不会增加很多开销在维护索引上。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/auto_increment_id.png" alt="auto_increment_primary_key"></p>
+<p>如果不用自增主键，而是采用身份证或者学号等作为主键，那么每次插入位置不固定，近似于随机，如下图所示：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/not_autoincrement_key.png" alt="not_auto_increment"></p>
+<p>新纪录的位置是现有索引页中间的某个位置，MySQL不得不为了将新记录插到合适位置而移动数据，从而进行多次的读取磁盘操作，频繁地移动、分页会使磁盘产生碎片。而且索引结构也不够紧凑，后续不得不通过OPTIMIZE TABLE来优化。</p>
+<p>为什么要用较小的字段值呢？因为InnoDB中，所有辅助索引都要引用主索引，过长的主索引会令辅助索引变得过大。</p>
+<p>所以，很多时候，我们都会采用一个自增的ID来作为主键，虽然这个ID本身可能并没有什么实际意义。</p>
+<h3 id="组合索引什么时候生效，什么时候失效？"><a href="#组合索引什么时候生效，什么时候失效？" class="headerlink" title="组合索引什么时候生效，什么时候失效？"></a>组合索引什么时候生效，什么时候失效？</h3><p>答：组合索引的生效条件是<strong>最左前缀</strong>。假如我对a，b，c三个字段添加了组合索引，那么当我按照（a,b,c）、（a,b）或（a）的组合来查询时，都会用到组合索引，其余情况则不会用到组合索引。</p>
+<p>组合索引的存储情况如下所示：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/combine_key.png" alt="combine_key"></p>
+<p>组合索引还是一个B+树，不同的是组合索引键值的数量不是1，而是大于等于2。所以数据的排列是按照这个顺序：(1,1),(1,2),(2,1),(2,4),(3,1),(3,2)。因此。我们使用类似<code>select * from t where a=xxx and b=xxx</code>和<code>select * from t where a=xxx</code>时，都可以使用索引。但是我们只按b查询，如<code>select * from t where b=xxx</code>，是无法用到这个索引的，因为叶节点上b的排列是1,2,1,4,1,2，不是一个有序的。</p>
+<blockquote>
+<p>这里还想说一下组合索引的另外一个好处：一般在一个SQL语句中，只会使用一个索引。但是如果SQL语句中既有查询又有排序时，只会使用查询字段的索引，然后进行一次filesort（可以通过explain来查看），这样的效率不高。这时，我们可以采用组合索引来对第二键值进行排序，也就是在查询和排序的字段上添加组合索引，这样可以省一次排序操作。</p>
+</blockquote>
+<h3 id="为什么使用like-quot-ABC-quot-索引会失效而like-quot-ABC-quot-不会呢？"><a href="#为什么使用like-quot-ABC-quot-索引会失效而like-quot-ABC-quot-不会呢？" class="headerlink" title="为什么使用like &quot;%ABC%&quot;索引会失效而like &quot;ABC%&quot;不会呢？"></a>为什么使用<code>like &quot;%ABC%&quot;</code>索引会失效而<code>like &quot;ABC%&quot;</code>不会呢？</h3><p>答：因为B+树是通过字段的值生成的，在使用时也是通过比较字段值和B+树节点来判断去往哪个节点。使用通配符%，也就意味着第一个字符是不确定的，所以无法和B+树节点进行比较，也就用不到索引了。类似于我们在成语字典查一个成语，如果不知道第一个字，也就无法使用目录了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇博客有这么几个知识点：</p>
+<ol>
+<li>MySQL中的索引是通过B+树实现的（不仅B+树，还有Hash等）；</li>
+<li>InnoDB的索引属于聚簇索引，必须要有主键；</li>
+<li>InnoDB的辅助索引的叶节点内容是主键值，所以还需要再查一次主键索引；</li>
+<li>MyISAM的索引属于非聚簇索引，主键索引和辅助索引没有区别；</li>
+</ol>
+<p>其实，记住下面这张图就可以了：</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_key/Combine.png" alt="Combine"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://www.ruzuojun.com/topic/420.html" target="_blank" rel="noopener">理解B+树算法和Innodb索引</a></p>
+<p><a href="http://jianhuchenmou.blog.51cto.com/7449945/1872457" target="_blank" rel="noopener">InnoDB索引实现</a></p>
+<p><a href="http://database.51cto.com/art/201504/473322_2.htm" target="_blank" rel="noopener">为什么要用B+树结构——MySQL索引结构的实现(3)</a></p>
+<p><a href="http://www.cnblogs.com/zuge/p/6164512.html" target="_blank" rel="noopener">MySQL为什么需要一个主键</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/09/18/MySQL索引详解/" data-id="cjecyyu76002g4cvni8otm8t0" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/09/23/PHP导出数据到Excel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP导出数据到Excel
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/30/MySQL之explain详解/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">MySQL之explain详解</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

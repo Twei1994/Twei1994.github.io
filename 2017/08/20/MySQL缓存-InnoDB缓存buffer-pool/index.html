@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MySQL缓存--InnoDB缓存buffer pool | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL缓存--InnoDB缓存buffer pool">
+<meta property="og:url" content="http://yoursite.com/2017/08/20/MySQL缓存-InnoDB缓存buffer-pool/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/Innodb_LRU_Chain.jpg">
+<meta property="og:updated_time" content="2017-08-20T15:03:35.219Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL缓存--InnoDB缓存buffer pool">
+<meta name="twitter:description" content="前言MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。">
+<meta name="twitter:image" content="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/Innodb_LRU_Chain.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-MySQL缓存-InnoDB缓存buffer-pool" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/08/20/MySQL缓存-InnoDB缓存buffer-pool/" class="article-date">
+  <time datetime="2017-08-20T02:55:02.000Z" itemprop="datePublished">2017-08-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础知识/">基础知识</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MySQL缓存--InnoDB缓存buffer pool
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>MySQL 缓存系列，介绍 MySQL 中应用的缓存技术，可用于 MySQL 优化。</p>
+<a id="more"></a>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="">MySQL缓存–服务器缓存query cache</a></p>
+<p><a href="">MySQL缓存–MyISAM缓存key cache</a></p>
+<p><a href="">MySQL缓存–InnoDB缓存buffer pool</a></p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>本文介绍 MySQL 缓存中的数据库引擎级别的缓存机制–InnoDB 采用的 buffer pool。</p>
+<h3 id="buffer-pool"><a href="#buffer-pool" class="headerlink" title="buffer pool"></a>buffer pool</h3><p>InnoDB 主索引是聚簇索引，索引与数据共用表空间，对于 InnoDB 而言，数据就是索引，索引就是数据。</p>
+<p>InnoDB 缓存机制和 MyISAM 缓存机制的最大区别就是在于，InnoDB 不仅仅是缓存索引，还会是缓存数据。与 MyISAM 相比，InnoDB 缓存可以占用更多的服务器内存缓存 InnoDB 表的相关信息，提升 InnoDB 性能。</p>
+<p>在内部，InnoDB 缓存池逻辑上由 freelist，flush list 和 LRU list 组成。顾名思义，free list 是空闲缓存块列表，flush list 是需要刷新到磁盘的缓存块列表，而 LRU list 是 InnoDB 正在使用的缓存块，它是 InnoDB buffer pool 的核心。</p>
+<h3 id="缓存更新机制"><a href="#缓存更新机制" class="headerlink" title="缓存更新机制"></a>缓存更新机制</h3><p>类似 MyISAM，InnoDB 的缓存更新机制也是在 LRU 基础上改进的 Minpoint 机制，它将整个 LRU list 分成了 New 和 Old 两部分。Old 子链表存放 old pages（里面存放的是长时间未被访问的数据页），New 子链接存放 new pages（里面存放的是最近被访问的数据页面）。Old pages 默认占整个列表大小的 37%（InnoDB_old_blocks_pct参数的默认值为37，取值范围是5~95），其余为 new pages 占用，如下图所示。</p>
+<p><img src="http://o77tdbi0j.bkt.clouddn.com/image/mysql_cache/Innodb_LRU_Chain.jpg" alt=""></p>
+<p>一个数据页是如何被读取到内存中的。总结一下，从启动开始的过程如下:</p>
+<ol>
+<li><p>系统初始化时，free链表中的所有页都可以被分配；</p>
+</li>
+<li><p>有数据请求的时候，将从磁盘读取到的 block 放入 LRU 链表中，该操作直接将所有的block 置为 new 并插入链表头部，直到 LRU 长度达到指定的 old 链表最小长度；</p>
+</li>
+<li><p>当 LRU 长度达到该长度时，InnoDB 会做如下操作：    </p>
+<ol>
+<li><p>将所有的 LRU 块都置为 old；</p>
+</li>
+<li><p>调整 LRU_old 到合适的位置（37%）；</p>
+</li>
+</ol>
+</li>
+<li><p>之后，每次有新的页要插入 LRU 时，将该页插入到 LRU_old 之后；</p>
+</li>
+<li><p>若第四步中的数据页在指定时间内（InnoDB_old_blocks_time）再次被访问，则将该页放到 LRU 链表头部，成为 LRU_new 的一部分；</p>
+</li>
+<li><p>当链表分配完，需要从 LRU_old 尾部寻找可以释放的 block；</p>
+</li>
+</ol>
+<h3 id="配置参数和状态参数"><a href="#配置参数和状态参数" class="headerlink" title="配置参数和状态参数"></a>配置参数和状态参数</h3><p>通过 <code>show variables like &quot;Innodb_buffer_pool%&quot;;</code> 可以查看 buffer_pool 相关的配置参数：</p>
+<pre><code>mysql&gt; show variables like &quot;Innodb_buffer_pool%&quot;;
++-------------------------------------+----------------+
+| Variable_name                       | Value          |
++-------------------------------------+----------------+
+| innodb_buffer_pool_chunk_size       | 134217728      |
+| innodb_buffer_pool_dump_at_shutdown | ON             |
+| innodb_buffer_pool_dump_now         | OFF            |
+| innodb_buffer_pool_dump_pct         | 25             |
+| innodb_buffer_pool_filename         | ib_buffer_pool |
+| innodb_buffer_pool_instances        | 1              |
+| innodb_buffer_pool_load_abort       | OFF            |
+| innodb_buffer_pool_load_at_startup  | ON             |
+| innodb_buffer_pool_load_now         | OFF            |
+| innodb_buffer_pool_size             | 134217728      |
++-------------------------------------+----------------+
+</code></pre><p>两个重要的参数含义如下：</p>
+<ul>
+<li>InnoDB_buffer_pool_size</li>
+</ul>
+<p>用于设置 InnoDB 缓存池（InnoDB_buffer_pool) 的大小，默认值是 47MB。InnoDB 缓存池的大小对 InnoDB 整体性能影响较大，如果当前的 MySQL 服务器专门用于提供 MySQL 服务，应尽量增加 InnoDB_buffer_pool_size 的大小，把频繁访问的数据都放到内存中来，尽可能减少 InnoDB 对硬盘的访问，争取将InnoDB最大化成为一个内存存储引擎。</p>
+<ul>
+<li>InnoDB_buffer_pool_instances</li>
+</ul>
+<p>默认值是 1，表示 InnoDB 缓存池被划分到一个区域。适当地增加该参数（例如将该参数值设置为 2，此时 InnoDB 被划分成为两个区域），可以提升 InnoDB 的并发性能。如果InnoDB 缓存池被划分成多个区域，建议每个区域不小于 1GB 的空间。</p>
+<p>通过 <code>show status like &quot;Innodb_buffer_pool%&quot;;</code> 可以查看 buffer pool 的运行状态：</p>
+<pre><code>mysql&gt; show status like &quot;Innodb_buffer_pool%&quot;;
++---------------------------------------+--------------------------------------------------+
+| Variable_name                         | Value                                            |
++---------------------------------------+--------------------------------------------------+
+| Innodb_buffer_pool_dump_status        | Dumping of buffer pool not started               |
+| Innodb_buffer_pool_load_status        | Buffer pool(s) load completed at 170819  9:57:57 |
+| Innodb_buffer_pool_resize_status      |                                                  |
+| Innodb_buffer_pool_pages_data         | 324                                              |
+| Innodb_buffer_pool_bytes_data         | 5308416                                          |
+| Innodb_buffer_pool_pages_dirty        | 0                                                |
+| Innodb_buffer_pool_bytes_dirty        | 0                                                |
+| Innodb_buffer_pool_pages_flushed      | 39                                               |
+| Innodb_buffer_pool_pages_free         | 7868                                             |
+| Innodb_buffer_pool_pages_misc         | 0                                                |
+| Innodb_buffer_pool_pages_total        | 8192                                             |
+| Innodb_buffer_pool_read_ahead_rnd     | 0                                                |
+| Innodb_buffer_pool_read_ahead         | 0                                                |
+| Innodb_buffer_pool_read_ahead_evicted | 0                                                |
+| Innodb_buffer_pool_read_requests      | 1620                                             |
+| Innodb_buffer_pool_reads              | 290                                              |
+| Innodb_buffer_pool_wait_free          | 0                                                |
+| Innodb_buffer_pool_write_requests     | 515                                              |
++---------------------------------------+--------------------------------------------------+
+</code></pre><p>可以看到一共有多少页（Innodb_buffer_pool_pages_total），空闲页数（Innodb_buffer_pool_pages_free），脏页数（Innodb_buffer_pool_pages_dirty）等等。通过这些状态可以调整配置来让缓存尽可能多地命中。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.csdn.net/bzfys/article/details/48137037" target="_blank" rel="noopener">每天进步一点点————优化MySQL SERVER（1）InnoDB篇</a></p>
+<p><a href="http://blog.csdn.net/yabingshi_tech/article/details/46622999" target="_blank" rel="noopener">innodb buffer pool</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/08/20/MySQL缓存-InnoDB缓存buffer-pool/" data-id="cjecyyu76002k4cvn3iy67999" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/">MySQL</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/08/23/PHP的标准输入和输出/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          PHP的标准输入和输出
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/20/MySQL缓存-MyISAM缓存key-cache/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">MySQL缓存--MyISAM缓存key cache</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/PHP内核/">PHP内核</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础教程/">基础教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础知识/">基础知识</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/教程/">教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/生活杂记/">生活杂记</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/科研/">科研</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程基础/">编程基础</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/课程/">课程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Apache/">Apache</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CMD/">CMD</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Markdown/">Markdown</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab/">Matlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OpenCV/">OpenCV</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP求职宝典/">PHP求职宝典</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/R/">R</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RStudio/">RStudio</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThinkPHP/">ThinkPHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echo/">echo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pcntl/">pcntl</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rewrite/">rewrite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sem/">sem</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shmop/">shmop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socket/">socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号/">信号</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/信号量/">信号量</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/垃圾回收/">垃圾回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符编码/">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/径向基/">径向基</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则/">正则</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/消息队列/">消息队列</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/爬虫/">爬虫</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/神经网络/">神经网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程/">进程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程通信/">进程通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进程，线程/">进程，线程</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Apache/" style="font-size: 14.44px;">Apache</a> <a href="/tags/CMD/" style="font-size: 10px;">CMD</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/FastCGI/" style="font-size: 10px;">FastCGI</a> <a href="/tags/Hexo/" style="font-size: 10px;">Hexo</a> <a href="/tags/Linux/" style="font-size: 12.22px;">Linux</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Matlab/" style="font-size: 18.89px;">Matlab</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/Nginx/" style="font-size: 14.44px;">Nginx</a> <a href="/tags/OpenCV/" style="font-size: 11.11px;">OpenCV</a> <a href="/tags/PHP/" style="font-size: 20px;">PHP</a> <a href="/tags/PHP求职宝典/" style="font-size: 11.11px;">PHP求职宝典</a> <a href="/tags/R/" style="font-size: 10px;">R</a> <a href="/tags/RStudio/" style="font-size: 10px;">RStudio</a> <a href="/tags/SEO/" style="font-size: 10px;">SEO</a> <a href="/tags/TCP/" style="font-size: 12.22px;">TCP</a> <a href="/tags/ThinkPHP/" style="font-size: 10px;">ThinkPHP</a> <a href="/tags/echo/" style="font-size: 10px;">echo</a> <a href="/tags/pcntl/" style="font-size: 12.22px;">pcntl</a> <a href="/tags/rewrite/" style="font-size: 12.22px;">rewrite</a> <a href="/tags/sem/" style="font-size: 10px;">sem</a> <a href="/tags/shmop/" style="font-size: 10px;">shmop</a> <a href="/tags/socket/" style="font-size: 10px;">socket</a> <a href="/tags/信号/" style="font-size: 10px;">信号</a> <a href="/tags/信号量/" style="font-size: 10px;">信号量</a> <a href="/tags/垃圾回收/" style="font-size: 10px;">垃圾回收</a> <a href="/tags/字符编码/" style="font-size: 12.22px;">字符编码</a> <a href="/tags/径向基/" style="font-size: 11.11px;">径向基</a> <a href="/tags/排序算法/" style="font-size: 15.56px;">排序算法</a> <a href="/tags/正则/" style="font-size: 11.11px;">正则</a> <a href="/tags/消息队列/" style="font-size: 10px;">消息队列</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a> <a href="/tags/神经网络/" style="font-size: 17.78px;">神经网络</a> <a href="/tags/算法/" style="font-size: 14.44px;">算法</a> <a href="/tags/管道/" style="font-size: 10px;">管道</a> <a href="/tags/缓存/" style="font-size: 13.33px;">缓存</a> <a href="/tags/计算机网络/" style="font-size: 13.33px;">计算机网络</a> <a href="/tags/设计模式/" style="font-size: 14.44px;">设计模式</a> <a href="/tags/进程/" style="font-size: 12.22px;">进程</a> <a href="/tags/进程通信/" style="font-size: 14.44px;">进程通信</a> <a href="/tags/进程，线程/" style="font-size: 10px;">进程，线程</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">December 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">November 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">October 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">August 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">June 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/04/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/01/查看系统位数、版本号和内核版本号/">查看系统位数、版本号和内核版本号</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/10/电脑开机时发生了什么？/">电脑开机时发生了什么？</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/01/PHP安全处理字符串/">PHP安全处理字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/28/PHP爬取百度图片/">PHP爬取百度图片</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
