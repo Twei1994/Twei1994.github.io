@@ -5,16 +5,17 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://yoursite.com">
+  <link rel="dns-prefetch" href="http://twei.site">
   <title>PHP内核之zval | twei&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="前言PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。 希望各位发现错误后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com">
 <meta name="keywords" content="PHP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PHP内核之zval">
-<meta property="og:url" content="http://yoursite.com/2017/07/22/PHP内核之zval/index.html">
+<meta property="og:url" content="http://twei.site/2017/07/22/PHP内核之zval/index.html">
 <meta property="og:site_name" content="twei&#39;s blog">
 <meta property="og:description" content="前言PHP 内核系列，记录一下对 PHP 内核的学习和理解。对 PHP 内核的研究可以让我们更深入地理解 PHP，让我们写出更好的代码。学习和理解 PHP 内核，也算是从菜鸟向前迈进的一步。 希望各位发现错误后不吝指正，谢谢。 我的邮箱是: tjutwei@163.com">
+<meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2017-07-22T16:18:51.976Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PHP内核之zval">
@@ -53,6 +54,8 @@
 		  <h1 class="header-author"><a href="/">Twei</a></h1>
 		</hgroup>
 		
+		<p class="header-subtitle">胆小认生 不易相处</p>
+		
 
 		<nav class="header-menu">
 			<ul>
@@ -70,10 +73,6 @@
     			
             
     			
-    			<a q-on="click: openSlider(e, 'friends')" href="javascript:void(0)">友链</a>
-    			
-            
-    			
     			<a q-on="click: openSlider(e, 'aboutme')" href="javascript:void(0)">关于我</a>
     			
             
@@ -81,13 +80,11 @@
 		<nav class="header-nav">
 			<div class="social">
 				
-					<a class="github" target="_blank" href="#" title="github"><i class="icon-github"></i></a>
-		        
-					<a class="weibo" target="_blank" href="#" title="weibo"><i class="icon-weibo"></i></a>
+					<a class="github" target="_blank" href="https://github.com/Twei1994" title="github"><i class="icon-github"></i></a>
 		        
 					<a class="rss" target="_blank" href="#" title="rss"><i class="icon-rss"></i></a>
 		        
-					<a class="zhihu" target="_blank" href="#" title="zhihu"><i class="icon-zhihu"></i></a>
+					<a class="mail" target="_blank" href="mailto:tjutwei@163.com" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -111,6 +108,8 @@
 			  <h1 class="header-author js-header-author">Twei</h1>
 			</hgroup>
 			
+			<p class="header-subtitle"><i class="icon icon-quo-left"></i>胆小认生 不易相处<i class="icon icon-quo-right"></i></p>
+			
 			
 			
 				
@@ -122,13 +121,11 @@
 			<nav class="header-nav">
 				<div class="social">
 					
-						<a class="github" target="_blank" href="#" title="github"><i class="icon-github"></i></a>
-			        
-						<a class="weibo" target="_blank" href="#" title="weibo"><i class="icon-weibo"></i></a>
+						<a class="github" target="_blank" href="https://github.com/Twei1994" title="github"><i class="icon-github"></i></a>
 			        
 						<a class="rss" target="_blank" href="#" title="rss"><i class="icon-rss"></i></a>
 			        
-						<a class="zhihu" target="_blank" href="#" title="zhihu"><i class="icon-zhihu"></i></a>
+						<a class="mail" target="_blank" href="mailto:tjutwei@163.com" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
@@ -178,8 +175,8 @@
 <p>希望各位发现错误后不吝指正，谢谢。</p>
 <p>我的邮箱是: <a href="mailto:tjutwei@163.com" target="_blank" rel="noopener">tjutwei@163.com</a></p>
 <a id="more"></a>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="http://twei.site/2017/07/22/PHP%E5%86%85%E6%A0%B8%E4%B9%8Bzval/" target="_blank" rel="noopener">PHP内核之zval</a></p>
-<p><a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">PHP的垃圾回收机制</a></p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p><a href="http://twei.site/2017/07/22/PHP%E5%86%85%E6%A0%B8%E4%B9%8Bzval/">PHP内核之zval</a></p>
+<p><a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">PHP的垃圾回收机制</a></p>
 <h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="PHP中的数据类型"><a href="#PHP中的数据类型" class="headerlink" title="PHP中的数据类型"></a>PHP中的数据类型</h3><p>相对于 C、 C++、 Java等其他编程语言，PHP 是一个弱类型的语言，意味着当我们要使用一个变量时，不需要去声明它的类型。这个特性给我们带来了很多便利，同时有时也会带来一些陷阱。那么，PHP 是真的没有数据类型这个说法吗？</p>
 <p>当然不是。在 PHP 官方文档中将 PHP 中的变量划分为三类：<strong>标量类型</strong>、<strong>复杂类型</strong>和<strong>特殊类型</strong>。标量类型包括布尔型（bool）、整型（int）、浮点型（float）和字符串（string）；复杂类型包括数组（array）和对象（object）；特殊类型包括 NULL 和资源（resource）。所以说 PHP 的变量细分的话，有 8 种数据类型。</p>
 <p>总所周知，PHP 的底层是用 C 语言实现的。我们的 PHP 脚本会经过 Zend 引擎解析为 C 代码再执行。那么，一个 PHP 的变量，在 C 语言上是怎么表示的呢？它最终会被解析成什么样呢？</p>
@@ -214,7 +211,7 @@ typedef struct _zval_struct zval;
 <p>通过判断它的值可以进行垃圾回收。在 PHP5.3 之前，使用<strong>引用计数</strong>的机制来实现 GC：如果一个 zval 的 refcount 减为 0，那么 Zend 引擎会认为没有任何变量指向该 zval，就会释放该 zval 所占的内存空间。但仅仅使用引用计数机制无法释放掉循环引用的 zval，这是就会导致内存泄露（Memory Leak）。</p>
 <p>在 5.3 以前，这个字段的名字还叫做 refcount，5.3 以后，在引入新的垃圾回收算法来对付循环引用，作者加入了大量的宏来操作 refcount，为了能让错误更快的显现，所以改名为 refcount__gc， 迫使大家都使用宏来操作 refcount。</p>
 <p>类似的， 还有第四个字段 is_ref， 这个值表示了 PHP 中的一个类型是否是引用。</p>
-<p>想了解 PHP 的垃圾回收机制，可以参考这篇博客：<a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">PHP的垃圾回收机制</a></p>
+<p>想了解 PHP 的垃圾回收机制，可以参考这篇博客：<a href="http://twei.site/2017/07/22/PHP%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">PHP的垃圾回收机制</a></p>
 <p>注：变量，也可以被称为符号，symbol。所有的符号都存在符号表（symbol table）中, 不同的作用域使用不同的符号表，关于这一点，<a href="">这篇博客</a>进行了讲解。</p>
 <h4 id="zend-uchar-type"><a href="#zend-uchar-type" class="headerlink" title="zend_uchar type"></a>zend_uchar type</h4><p>这个字段用于表明变量属于 PHP 8 种类型的哪种。在 zend 内部，这些类型对应于下面的宏（代码位置 phpsrc/Zend/zend.h）：</p>
 <pre><code>#define IS_NULL     0
@@ -391,7 +388,7 @@ typedef struct _zval_struct zval;
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2017/07/22/PHP内核之zval/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://twei.site/2017/07/22/PHP内核之zval/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -503,25 +500,17 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
       
       
     
-      
-      
-      
-    
     
 
     <ul style="width: 70%">
     
     
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
       
         
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'friends')"><a href="javascript:void(0)" q-class="active:friends">友链</a></li>
-      
-        
-      
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
       
         
     </ul>
@@ -542,6 +531,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Apache</a>
               </li>
              
@@ -550,15 +543,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+                <a href="javascript:void(0)" class="js-tag color2">OpenCV</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
+                <a href="javascript:void(0)" class="js-tag color5">Hexo</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -570,11 +567,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Hexo</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">OpenCV</a>
+                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -586,7 +579,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
+                <a href="javascript:void(0)" class="js-tag color4">径向基</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -594,7 +587,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">径向基</a>
+                <a href="javascript:void(0)" class="js-tag color1">Excel</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -602,7 +595,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Excel</a>
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -610,19 +607,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">socket</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">信号</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">进程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -638,15 +627,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">socket</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -654,7 +635,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+                <a href="javascript:void(0)" class="js-tag color3">进程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -666,7 +659,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
+                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -674,19 +667,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
+                <a href="javascript:void(0)" class="js-tag color3">正则</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">正则</a>
+                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -702,15 +691,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">生活</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CMD</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">进程，线程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">生活</a>
               </li>
             
             <div class="clearfix"></div>
@@ -757,43 +746,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
     
 
     
-    	<section class="tools-section tools-section-friends" q-show="friends">
-  		
-        <ul class="search-ul">
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接4</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接5</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接6</a>
-            </li>
-          
-        </ul>
-  		
-    	</section>
-    
 
     
     	<section class="tools-section tools-section-me" q-show="aboutme">
   	  	
-  	  		<div class="aboutme-wrap" id="js-aboutme">很惭愧&lt;br&gt;&lt;br&gt;只做了一点微小的工作&lt;br&gt;谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="js-aboutme">敌视现实 虚构远方&lt;br&gt;东张西望 一无所长&lt;br&gt;四体不勤 五谷不分&lt;br&gt;文不能测字 武不能防身</div>
   	  	
     	</section>
     

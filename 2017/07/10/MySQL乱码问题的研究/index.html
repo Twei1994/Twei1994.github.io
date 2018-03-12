@@ -5,16 +5,17 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://yoursite.com">
+  <link rel="dns-prefetch" href="http://twei.site">
   <title>MySQL乱码问题的研究 | twei&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="前言数据库的乱码问题一直很让人头疼，其实根本的原因在于对字符集和数据库存储过程理解不够。这两天把MySQL的乱码问题研究了一下，在这里记录下收获和感想。">
 <meta name="keywords" content="MySQL,字符编码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL乱码问题的研究">
-<meta property="og:url" content="http://yoursite.com/2017/07/10/MySQL乱码问题的研究/index.html">
+<meta property="og:url" content="http://twei.site/2017/07/10/MySQL乱码问题的研究/index.html">
 <meta property="og:site_name" content="twei&#39;s blog">
 <meta property="og:description" content="前言数据库的乱码问题一直很让人头疼，其实根本的原因在于对字符集和数据库存储过程理解不够。这两天把MySQL的乱码问题研究了一下，在这里记录下收获和感想。">
+<meta property="og:locale" content="en">
 <meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/charset/character_variables.png">
 <meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/charset/res.png">
 <meta property="og:image" content="http://o77tdbi0j.bkt.clouddn.com/image/charset/insert_error_utf8.png">
@@ -59,6 +60,8 @@
 		  <h1 class="header-author"><a href="/">Twei</a></h1>
 		</hgroup>
 		
+		<p class="header-subtitle">胆小认生 不易相处</p>
+		
 
 		<nav class="header-menu">
 			<ul>
@@ -76,10 +79,6 @@
     			
             
     			
-    			<a q-on="click: openSlider(e, 'friends')" href="javascript:void(0)">友链</a>
-    			
-            
-    			
     			<a q-on="click: openSlider(e, 'aboutme')" href="javascript:void(0)">关于我</a>
     			
             
@@ -87,13 +86,11 @@
 		<nav class="header-nav">
 			<div class="social">
 				
-					<a class="github" target="_blank" href="#" title="github"><i class="icon-github"></i></a>
-		        
-					<a class="weibo" target="_blank" href="#" title="weibo"><i class="icon-weibo"></i></a>
+					<a class="github" target="_blank" href="https://github.com/Twei1994" title="github"><i class="icon-github"></i></a>
 		        
 					<a class="rss" target="_blank" href="#" title="rss"><i class="icon-rss"></i></a>
 		        
-					<a class="zhihu" target="_blank" href="#" title="zhihu"><i class="icon-zhihu"></i></a>
+					<a class="mail" target="_blank" href="mailto:tjutwei@163.com" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -117,6 +114,8 @@
 			  <h1 class="header-author js-header-author">Twei</h1>
 			</hgroup>
 			
+			<p class="header-subtitle"><i class="icon icon-quo-left"></i>胆小认生 不易相处<i class="icon icon-quo-right"></i></p>
+			
 			
 			
 				
@@ -128,13 +127,11 @@
 			<nav class="header-nav">
 				<div class="social">
 					
-						<a class="github" target="_blank" href="#" title="github"><i class="icon-github"></i></a>
-			        
-						<a class="weibo" target="_blank" href="#" title="weibo"><i class="icon-weibo"></i></a>
+						<a class="github" target="_blank" href="https://github.com/Twei1994" title="github"><i class="icon-github"></i></a>
 			        
 						<a class="rss" target="_blank" href="#" title="rss"><i class="icon-rss"></i></a>
 			        
-						<a class="zhihu" target="_blank" href="#" title="zhihu"><i class="icon-zhihu"></i></a>
+						<a class="mail" target="_blank" href="mailto:tjutwei@163.com" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
@@ -182,7 +179,7 @@
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>数据库的乱码问题一直很让人头疼，其实根本的原因在于对字符集和数据库存储过程理解不够。这两天把MySQL的乱码问题研究了一下，在这里记录下收获和感想。</p>
 <a id="more"></a>
-<h2 id="字符集"><a href="#字符集" class="headerlink" title="字符集"></a>字符集</h2><p>解决乱码问题，首先要理解字符集。常见的字符集有 <code>ASCII</code>，<code>GBK</code>，<code>GB2312</code>，<code>Unicode</code>，<code>UTF-8</code>等。关于字符集的详细知识可以看我之前写的<a href="http://twei.site/2016/09/12/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" target="_blank" rel="noopener">这篇博客</a>。</p>
+<h2 id="字符集"><a href="#字符集" class="headerlink" title="字符集"></a>字符集</h2><p>解决乱码问题，首先要理解字符集。常见的字符集有 <code>ASCII</code>，<code>GBK</code>，<code>GB2312</code>，<code>Unicode</code>，<code>UTF-8</code>等。关于字符集的详细知识可以看我之前写的<a href="http://twei.site/2016/09/12/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/">这篇博客</a>。</p>
 <p>总而言之，因为计算机只能处理 0 和 1，所以不管是英文字母、汉字、日文或者是其他的一些符号，都要用 0 和 1 来表示。这些表示方法就是字符集。不同时期和不同机构定义的字符集内容和规则是不一样的。</p>
 <p>例如：对于同一个汉字 “中”，在 <code>Unicode</code> 字符集中的编码是 <code>01001110 00101101</code>，而在 <code>UTF-8</code> 中的编码是 <code>11100100 10111000 10101101</code>。</p>
 <p>一个二进制的字符串，如果没有告诉我们对应的字符集，那么我们是无法知道它到底表示了哪个字符。采用了错误的字符集对这个二进制的字符串进行解释，就会造成乱码。</p>
@@ -235,7 +232,7 @@
 <p>字段的字符集信息可以用命令 <code>show full columns from table_name</code> 来查看。</p>
 <h2 id="更新（insert，update）和查询（select）时字符集的转换"><a href="#更新（insert，update）和查询（select）时字符集的转换" class="headerlink" title="更新（insert，update）和查询（select）时字符集的转换"></a>更新（insert，update）和查询（select）时字符集的转换</h2><p>更新时字符集转换过程： <strong><code>character_set_client</code> –&gt; <code>character_set_connection</code> –&gt; 表字符集</strong>；</p>
 <p>查询时字符集转换过程：<strong>表字符集 –&gt; <code>character_set_result</code></strong></p>
-<p>这里其实还存在另外一个过程，就是SQL的输入和结果的显示。因为我们要通过输入输出设备来输入 SQL 语句和获取查询结果，例如 CMD 窗口，CMD 窗口在显示时也会使用字符（windows 默认的是 <code>GBK</code>），所以它的字符集也需要我们考虑在内。通过设置可以修改，具体方法可以查看<a href="http://twei.site/2017/07/09/%E8%AE%BE%E7%BD%AECMD%E6%98%BE%E7%A4%BA%E7%BC%96%E7%A0%81/" target="_blank" rel="noopener">这里</a>。</p>
+<p>这里其实还存在另外一个过程，就是SQL的输入和结果的显示。因为我们要通过输入输出设备来输入 SQL 语句和获取查询结果，例如 CMD 窗口，CMD 窗口在显示时也会使用字符（windows 默认的是 <code>GBK</code>），所以它的字符集也需要我们考虑在内。通过设置可以修改，具体方法可以查看<a href="http://twei.site/2017/07/09/%E8%AE%BE%E7%BD%AECMD%E6%98%BE%E7%A4%BA%E7%BC%96%E7%A0%81/">这里</a>。</p>
 <h2 id="字符集转换原理"><a href="#字符集转换原理" class="headerlink" title="字符集转换原理"></a>字符集转换原理</h2><p>转换原理并不复杂。每个字符集可以看作是一个表，存储着字符和对应的编码。假设 <code>GBK</code>字符集的字符串“小明”，需要转为 <code>UTF8</code> 字符集存储，实际就是对于“小明”字符串中的每个汉字去 <code>UTF8</code> 编码表里面查询对应的二进制，然后存储。</p>
 <h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><p>对常见的情况进行了实验，下面先给出结果图：</p>
 <p><img src="http://o77tdbi0j.bkt.clouddn.com/image/charset/res.png" alt=""></p>
@@ -388,7 +385,7 @@ SELECT LENGTH(COL_NAME) FROM TABLE_NAME;  // 字节数
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2017/07/10/MySQL乱码问题的研究/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://twei.site/2017/07/10/MySQL乱码问题的研究/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -500,25 +497,17 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
       
       
     
-      
-      
-      
-    
     
 
     <ul style="width: 70%">
     
     
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'innerArchive')"><a href="javascript:void(0)" q-class="active:innerArchive">所有文章</a></li>
       
         
       
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'friends')"><a href="javascript:void(0)" q-class="active:friends">友链</a></li>
-      
-        
-      
-      <li style="width: 33.333333333333336%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
+      <li style="width: 50%" q-on="click: openSlider(e, 'aboutme')"><a href="javascript:void(0)" q-class="active:aboutme">关于我</a></li>
       
         
     </ul>
@@ -539,6 +528,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Apache</a>
               </li>
              
@@ -547,15 +540,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+                <a href="javascript:void(0)" class="js-tag color2">OpenCV</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
+                <a href="javascript:void(0)" class="js-tag color5">Hexo</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -567,11 +564,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Hexo</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">OpenCV</a>
+                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -583,7 +576,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
+                <a href="javascript:void(0)" class="js-tag color4">径向基</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -591,7 +584,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">径向基</a>
+                <a href="javascript:void(0)" class="js-tag color1">Excel</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -599,7 +592,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Excel</a>
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -607,19 +604,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">socket</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">信号</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">进程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -635,15 +624,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">socket</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -651,7 +632,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+                <a href="javascript:void(0)" class="js-tag color3">进程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -663,7 +656,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
+                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -671,19 +664,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
+                <a href="javascript:void(0)" class="js-tag color3">正则</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">正则</a>
+                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -699,15 +688,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">生活</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CMD</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">进程，线程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">生活</a>
               </li>
             
             <div class="clearfix"></div>
@@ -754,43 +743,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
     
 
     
-    	<section class="tools-section tools-section-friends" q-show="friends">
-  		
-        <ul class="search-ul">
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接4</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接5</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接6</a>
-            </li>
-          
-        </ul>
-  		
-    	</section>
-    
 
     
     	<section class="tools-section tools-section-me" q-show="aboutme">
   	  	
-  	  		<div class="aboutme-wrap" id="js-aboutme">很惭愧&lt;br&gt;&lt;br&gt;只做了一点微小的工作&lt;br&gt;谢谢大家</div>
+  	  		<div class="aboutme-wrap" id="js-aboutme">敌视现实 虚构远方&lt;br&gt;东张西望 一无所长&lt;br&gt;四体不勤 五谷不分&lt;br&gt;文不能测字 武不能防身</div>
   	  	
     	</section>
     
