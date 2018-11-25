@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="twei&#39;s blog">
 <meta property="og:description" content="前言计数器（counter）是一个很常用的工具，比方说统计页面访问次数、存放当前排队人数等。它的基本功能有两个：计数和取数。  计数：在某种情况下触发，计数器累加1（或n）  取数：返回计数器当前计数    本文所说的计数器是基于单台机器。">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-11-25T03:27:54.906Z">
+<meta property="og:updated_time" content="2018-11-25T03:30:21.451Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang实现一个计数器">
 <meta name="twitter:description" content="前言计数器（counter）是一个很常用的工具，比方说统计页面访问次数、存放当前排队人数等。它的基本功能有两个：计数和取数。  计数：在某种情况下触发，计数器累加1（或n）  取数：返回计数器当前计数    本文所说的计数器是基于单台机器。">
@@ -195,14 +195,10 @@
 <li>需要存最大计数值，maxCount</li>
 <li>支持多线程，需要一个锁，lock</li>
 </ol>
-<p>那么，计数器的结构就出来了：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Counter <span class="keyword">struct</span> &#123;</span><br><span class="line">    count <span class="keyword">int64</span></span><br><span class="line">    start <span class="keyword">int64</span></span><br><span class="line">    duration <span class="keyword">int64</span></span><br><span class="line">    maxCount <span class="keyword">int64</span></span><br><span class="line">    lock sync.Mutex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>新建一个计数器：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCounter</span><span class="params">(duration <span class="keyword">int64</span>, maxCount <span class="keyword">int64</span>)</span> *<span class="title">Counter</span></span> &#123;</span><br><span class="line">	counter := &amp;Counter&#123;&#125;</span><br><span class="line">	counter.count = <span class="number">0</span></span><br><span class="line">	counter.start = time.Now().UnixNano() / <span class="number">1e6</span>   <span class="comment">// 当前毫秒时间戳</span></span><br><span class="line">	<span class="keyword">if</span> (duration == <span class="number">0</span>) &#123;</span><br><span class="line">		counter.duration = math.MaxInt64  <span class="comment">// duration传0表示没有时间间隔限制，计数器不刷新</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		counter.duration = duration</span><br><span class="line">	&#125;</span><br><span class="line">	counter.maxCount = maxCount</span><br><span class="line">	<span class="keyword">return</span> counter</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>计数：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Count 计数器计数</span></span><br><span class="line"><span class="comment">// n: 计数值</span></span><br><span class="line"><span class="comment">// refersh: 计数器是否刷新</span></span><br><span class="line"><span class="comment">// limit: 是否达到计数最大值</span></span><br><span class="line"><span class="comment">// num: 计数后计数器的值</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(counter *Counter)</span> <span class="title">Count</span><span class="params">(n <span class="keyword">int64</span>)</span> <span class="params">(refresh <span class="keyword">bool</span>, limit <span class="keyword">bool</span>, num <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	now := time.Now().UnixNano() / <span class="number">1e6</span></span><br><span class="line">	counter.lock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> counter.lock.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> now - counter.start &lt; counter.duration &#123;</span><br><span class="line">		counter.count += n</span><br><span class="line">		num = counter.count</span><br><span class="line">		limit = num &gt; counter.maxCount</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// num = counter.count  // 刷新前的最大计数</span></span><br><span class="line">		counter.start = now</span><br><span class="line">		counter.count = <span class="number">0</span></span><br><span class="line">		refresh = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>取数：</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(counter *Counter)</span> <span class="title">GetCount</span><span class="params">()</span> <span class="params">(num <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">    counter.lock.Lock()</span><br><span class="line">    <span class="keyword">defer</span> counter.lock.Unlock()</span><br><span class="line">	<span class="keyword">return</span> counter.count</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么，计数器的结构就出来了：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Counter <span class="keyword">struct</span> &#123;</span><br><span class="line">    count <span class="keyword">int64</span></span><br><span class="line">    start <span class="keyword">int64</span></span><br><span class="line">    duration <span class="keyword">int64</span></span><br><span class="line">    maxCount <span class="keyword">int64</span></span><br><span class="line">    lock sync.Mutex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>新建一个计数器：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCounter</span><span class="params">(duration <span class="keyword">int64</span>, maxCount <span class="keyword">int64</span>)</span> *<span class="title">Counter</span></span> &#123;</span><br><span class="line">	counter := &amp;Counter&#123;&#125;</span><br><span class="line">	counter.count = <span class="number">0</span></span><br><span class="line">	counter.start = time.Now().UnixNano() / <span class="number">1e6</span>   <span class="comment">// 当前毫秒时间戳</span></span><br><span class="line">	<span class="keyword">if</span> (duration == <span class="number">0</span>) &#123;</span><br><span class="line">		counter.duration = math.MaxInt64  <span class="comment">// duration传0表示没有时间间隔限制，计数器不刷新</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		counter.duration = duration</span><br><span class="line">	&#125;</span><br><span class="line">	counter.maxCount = maxCount</span><br><span class="line">	<span class="keyword">return</span> counter</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>计数：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Count 计数器计数</span></span><br><span class="line"><span class="comment">// n: 计数值</span></span><br><span class="line"><span class="comment">// refersh: 计数器是否刷新</span></span><br><span class="line"><span class="comment">// limit: 是否达到计数最大值</span></span><br><span class="line"><span class="comment">// num: 计数后计数器的值</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(counter *Counter)</span> <span class="title">Count</span><span class="params">(n <span class="keyword">int64</span>)</span> <span class="params">(refresh <span class="keyword">bool</span>, limit <span class="keyword">bool</span>, num <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	now := time.Now().UnixNano() / <span class="number">1e6</span></span><br><span class="line">	counter.lock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> counter.lock.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> now - counter.start &lt; counter.duration &#123;</span><br><span class="line">		counter.count += n</span><br><span class="line">		num = counter.count</span><br><span class="line">		limit = num &gt; counter.maxCount</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// num = counter.count  // 刷新前的最大计数</span></span><br><span class="line">		counter.start = now</span><br><span class="line">		counter.count = <span class="number">0</span></span><br><span class="line">		refresh = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>取数：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(counter *Counter)</span> <span class="title">GetCount</span><span class="params">()</span> <span class="params">(num <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">    counter.lock.Lock()</span><br><span class="line">    <span class="keyword">defer</span> counter.lock.Unlock()</span><br><span class="line">	<span class="keyword">return</span> counter.count</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>我测试了一下，只是计数的话，每秒的计数上限大概是1千万左右，基本可以满足日常业务的需求。</p>
 
       
@@ -371,6 +367,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Apache</a>
               </li>
              
@@ -387,23 +387,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Matlab</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">神经网络</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -419,6 +403,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Matlab</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">神经网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">径向基</a>
               </li>
              
@@ -431,15 +427,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">进程通信</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">信号</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
+                <a href="javascript:void(0)" class="js-tag color3">PHP求职宝典</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -447,19 +435,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">PHP求职宝典</a>
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">信号量</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">进程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+                <a href="javascript:void(0)" class="js-tag color5">进程通信</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -467,15 +447,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+                <a href="javascript:void(0)" class="js-tag color3">信号</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">url</a>
+                <a href="javascript:void(0)" class="js-tag color4">信号量</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -487,6 +463,42 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">管道</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">进程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ThinkPHP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">url</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">golang</a>
               </li>
              
@@ -495,23 +507,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ThinkPHP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">正则</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -523,11 +519,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">正则</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">echo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">SEO</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -543,19 +547,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">管道</a>
+                <a href="javascript:void(0)" class="js-tag color3">reflect</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">随笔</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">反射</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">SEO</a>
               </li>
             
             <div class="clearfix"></div>

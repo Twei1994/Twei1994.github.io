@@ -9,14 +9,14 @@
   <title>通过反射读取配置文件 | twei&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="前言通常，在项目启动前，都要读取配置文件，如mysql，redis，Kafka配置等。这里介绍一种通过反射来将配置从文件读取至对应配置变量的方法。 这样做的优点在于：  配置变量和配置文件结构对应； 增删配置时只需修改配置文件和对应的配置变量类型；  本文用到了第三方库：goconfig">
-<meta name="keywords" content="反射">
+<meta name="keywords" content="golang,reflect">
 <meta property="og:type" content="article">
 <meta property="og:title" content="通过反射读取配置文件">
 <meta property="og:url" content="http://twei.site/2018/11/04/通过反射读取配置文件/index.html">
 <meta property="og:site_name" content="twei&#39;s blog">
 <meta property="og:description" content="前言通常，在项目启动前，都要读取配置文件，如mysql，redis，Kafka配置等。这里介绍一种通过反射来将配置从文件读取至对应配置变量的方法。 这样做的优点在于：  配置变量和配置文件结构对应； 增删配置时只需修改配置文件和对应的配置变量类型；  本文用到了第三方库：goconfig">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-11-04T08:00:41.031Z">
+<meta property="og:updated_time" content="2018-11-25T03:37:33.906Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="通过反射读取配置文件">
 <meta name="twitter:description" content="前言通常，在项目启动前，都要读取配置文件，如mysql，redis，Kafka配置等。这里介绍一种通过反射来将配置从文件读取至对应配置变量的方法。 这样做的优点在于：  配置变量和配置文件结构对应； 增删配置时只需修改配置文件和对应的配置变量类型；  本文用到了第三方库：goconfig">
@@ -182,13 +182,13 @@
 <p>本文用到了第三方库：<a href="https://github.com/Unknwon/goconfig" target="_blank" rel="noopener">goconfig</a></p>
 <a id="more"></a>
 <h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>下面的配置文件（config.ini）来自于我的一个项目，可以看到配置项的数据类型有int和string（包括用分割符连接的），不同的配置通过section来区分。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[base]</span><br><span class="line">projectName=load config demo</span><br><span class="line">startTime=1541315238</span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line">host=127.0.0.1</span><br><span class="line">port=3306</span><br><span class="line">user=root</span><br><span class="line">password=pass</span><br><span class="line">maxConn=100</span><br><span class="line"></span><br><span class="line">[redis]</span><br><span class="line">host=127.0.0.1</span><br><span class="line">port=123123</span><br><span class="line">auth=sadf23df-fgserf</span><br><span class="line"></span><br><span class="line">[alert]</span><br><span class="line">email=email1,email2,email3</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[base]</span><br><span class="line">projectName=load config demo</span><br><span class="line">startTime=<span class="number">1541315238</span></span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line">host=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">port=<span class="number">3306</span></span><br><span class="line">user=root</span><br><span class="line">password=pass</span><br><span class="line">maxConn=<span class="number">100</span></span><br><span class="line"></span><br><span class="line">[redis]</span><br><span class="line">host=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">port=<span class="number">123123</span></span><br><span class="line">auth=sadf23df-fgserf</span><br><span class="line"></span><br><span class="line">[alert]</span><br><span class="line">email=email1,email2,email3</span><br></pre></td></tr></table></figure>
 <h3 id="配置变量"><a href="#配置变量" class="headerlink" title="配置变量"></a>配置变量</h3><p>在项目中定义一个类型，和配置文件结构对应。<strong>注意：通过tag来标识</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">type ProjectConfig struct &#123;</span><br><span class="line">	BaseConfig BaseConfig `tag:&quot;base&quot;`</span><br><span class="line">	MysqlConfig MysqlConfig `tag:&quot;mysql&quot;`</span><br><span class="line">	RedisConfig RedisConfig `tag:&quot;redis&quot;`</span><br><span class="line">	AlertConfig AlertConfig `tag:&quot;alert&quot;`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type BaseConfig struct &#123;</span><br><span class="line">	ProjectName string `tag:&quot;projectName&quot;`</span><br><span class="line">    Starttime int64 `tag:&quot;startTime&quot;`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type MysqlConfig struct &#123;</span><br><span class="line">	Host string `tag:&quot;host&quot;`</span><br><span class="line">	Port int `tag:&quot;port&quot;`</span><br><span class="line">	User string `tag:&quot;user&quot;`</span><br><span class="line">	Password string `tag:&quot;password&quot;`</span><br><span class="line">	MaxConn int `tag:&quot;maxConn&quot;`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type RedisConfig struct &#123;</span><br><span class="line">	Host string `tag:&quot;host&quot;`</span><br><span class="line">	Port int `tag:&quot;port&quot;`</span><br><span class="line">	Auth string `tag:&quot;auth&quot;`</span><br><span class="line">	DelayTime int `tag:&quot;delayTime&quot;`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type AlertConfig struct &#123;</span><br><span class="line">	Email []string `tag:&quot;email&quot; delim:&quot;,&quot;`  // 这里除了用tag作为标识外，还定义了delim表示分割符</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ProjectConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	BaseConfig BaseConfig <span class="string">`tag:"base"`</span></span><br><span class="line">	MysqlConfig MysqlConfig <span class="string">`tag:"mysql"`</span></span><br><span class="line">	RedisConfig RedisConfig <span class="string">`tag:"redis"`</span></span><br><span class="line">	AlertConfig AlertConfig <span class="string">`tag:"alert"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> BaseConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	ProjectName <span class="keyword">string</span> <span class="string">`tag:"projectName"`</span></span><br><span class="line">    Starttime <span class="keyword">int64</span> <span class="string">`tag:"startTime"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> MysqlConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	Host <span class="keyword">string</span> <span class="string">`tag:"host"`</span></span><br><span class="line">	Port <span class="keyword">int</span> <span class="string">`tag:"port"`</span></span><br><span class="line">	User <span class="keyword">string</span> <span class="string">`tag:"user"`</span></span><br><span class="line">	Password <span class="keyword">string</span> <span class="string">`tag:"password"`</span></span><br><span class="line">	MaxConn <span class="keyword">int</span> <span class="string">`tag:"maxConn"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> RedisConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	Host <span class="keyword">string</span> <span class="string">`tag:"host"`</span></span><br><span class="line">	Port <span class="keyword">int</span> <span class="string">`tag:"port"`</span></span><br><span class="line">	Auth <span class="keyword">string</span> <span class="string">`tag:"auth"`</span></span><br><span class="line">	DelayTime <span class="keyword">int</span> <span class="string">`tag:"delayTime"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> AlertConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">	Email []<span class="keyword">string</span> <span class="string">`tag:"email" delim:","`</span>  <span class="comment">// 这里除了用tag作为标识外，还定义了delim表示分割符</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="读取配置"><a href="#读取配置" class="headerlink" title="读取配置"></a>读取配置</h3><p>思路：通过反射可以获取变量的tag，从而将变量和配置项关联起来，实现自动按照类型读取配置。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">// 此处必须是pointer：因为要通过反射修改值，必须是addressable。</span><br><span class="line">func (pConf *ProjectConfig)Init(cfg *goconfig.ConfigFile) &#123;</span><br><span class="line">    pConfVal := reflect.ValueOf(pConf)</span><br><span class="line">    pConfType := reflect.TypeOf(pConf)</span><br><span class="line"></span><br><span class="line">    sectionNum := pConfType.Elem().NumField()</span><br><span class="line"></span><br><span class="line">    for i := 0; i &lt; sectionNum; i++ &#123;</span><br><span class="line">        section := pConfType.Elem().Field(i)        </span><br><span class="line">        </span><br><span class="line">        // 获取配置的section名称</span><br><span class="line">        sectionName := section.Tag.Get(&quot;tag&quot;)</span><br><span class="line">        if len(sectionName) &lt;= 0 &#123;</span><br><span class="line">            continue</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        sectionType := section.Type</span><br><span class="line"></span><br><span class="line">        switch sectionType.Kind() &#123;</span><br><span class="line">        case reflect.Struct:</span><br><span class="line">            fieldNum := sectionType.NumField()</span><br><span class="line"></span><br><span class="line">            for k := 0; k &lt; fieldNum; k++ &#123;</span><br><span class="line">                field := sectionType.Field(k)</span><br><span class="line"></span><br><span class="line">                // 获取配置项名称</span><br><span class="line">                fieldName := field.Tag.Get(&quot;tag&quot;)</span><br><span class="line">                if len(fieldName) &lt;= 0 &#123;</span><br><span class="line">                    continue</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                fieldType := field.Type</span><br><span class="line"></span><br><span class="line">                switch fieldType.Kind() &#123;</span><br><span class="line">                case reflect.String:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustValue(sectionName, fieldName)))</span><br><span class="line">                case reflect.Int:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustInt(sectionName, fieldName)))</span><br><span class="line">				case reflect.Int64:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustInt64(sectionName, fieldName)))</span><br><span class="line">				case reflect.Slice:</span><br><span class="line">					delim := field.Tag.Get(&quot;delim&quot;)</span><br><span class="line">					pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustValueArray(sectionName, fieldName, delim)))</span><br><span class="line">                default:</span><br><span class="line">                </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        default:</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// main函数</span><br><span class="line">func main() &#123;</span><br><span class="line">    // 此处可以用flag来从启动命令中获取</span><br><span class="line">	cfg, err := goconfig.LoadConfigFile(&quot;./config.ini&quot;)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		panic(&quot;load config file failed&quot;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	projectConfig := &amp;ProjectConfig&#123;&#125;</span><br><span class="line">	projectConfig.Init(cfg)</span><br><span class="line"></span><br><span class="line">	fmt.Println(projectConfig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 运行结果</span><br><span class="line">&amp;&#123;&#123;load config demo 1541315238&#125; &#123;127.0.0.1 3306 root pass 100&#125; &#123;127.0.0.1 123123 sadf23df-fgserf 0&#125; &#123;[email1 email2 email3]&#125;&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 此处必须是pointer：因为要通过反射修改值，必须是addressable。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pConf *ProjectConfig)</span><span class="title">Init</span><span class="params">(cfg *goconfig.ConfigFile)</span></span> &#123;</span><br><span class="line">    pConfVal := reflect.ValueOf(pConf)</span><br><span class="line">    pConfType := reflect.TypeOf(pConf)</span><br><span class="line"></span><br><span class="line">    sectionNum := pConfType.Elem().NumField()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; sectionNum; i++ &#123;</span><br><span class="line">        section := pConfType.Elem().Field(i)        </span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 获取配置的section名称</span></span><br><span class="line">        sectionName := section.Tag.Get(<span class="string">"tag"</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(sectionName) &lt;= <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        sectionType := section.Type</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> sectionType.Kind() &#123;</span><br><span class="line">        <span class="keyword">case</span> reflect.Struct:</span><br><span class="line">            fieldNum := sectionType.NumField()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> k := <span class="number">0</span>; k &lt; fieldNum; k++ &#123;</span><br><span class="line">                field := sectionType.Field(k)</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 获取配置项名称</span></span><br><span class="line">                fieldName := field.Tag.Get(<span class="string">"tag"</span>)</span><br><span class="line">                <span class="keyword">if</span> <span class="built_in">len</span>(fieldName) &lt;= <span class="number">0</span> &#123;</span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                fieldType := field.Type</span><br><span class="line"></span><br><span class="line">                <span class="keyword">switch</span> fieldType.Kind() &#123;</span><br><span class="line">                <span class="keyword">case</span> reflect.String:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustValue(sectionName, fieldName)))</span><br><span class="line">                <span class="keyword">case</span> reflect.Int:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustInt(sectionName, fieldName)))</span><br><span class="line">				<span class="keyword">case</span> reflect.Int64:</span><br><span class="line">                    pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustInt64(sectionName, fieldName)))</span><br><span class="line">				<span class="keyword">case</span> reflect.Slice:</span><br><span class="line">					delim := field.Tag.Get(<span class="string">"delim"</span>)</span><br><span class="line">					pConfVal.Elem().Field(i).Field(k).Set(reflect.ValueOf(cfg.MustValueArray(sectionName, fieldName, delim)))</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 此处可以用flag来从启动命令中获取</span></span><br><span class="line">	cfg, err := goconfig.LoadConfigFile(<span class="string">"./config.ini"</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">"load config file failed"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	projectConfig := &amp;ProjectConfig&#123;&#125;</span><br><span class="line">	projectConfig.Init(cfg)</span><br><span class="line"></span><br><span class="line">	fmt.Println(projectConfig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">&amp;&#123;&#123;load config demo <span class="number">1541315238</span>&#125; &#123;<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">3306</span> root pass <span class="number">100</span>&#125; &#123;<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">123123</span> sadf23df-fgserf <span class="number">0</span>&#125; &#123;[email1 email2 email3]&#125;&#125;</span><br></pre></td></tr></table></figure>
 <p>从运行结果可以看到，所有的配置都载入了变量projectConfig中。接下来，就可以进行另外的初始化工作，如初始化数据库连接池等等。</p>
 
       
@@ -203,7 +203,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">反射</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">reflect</a>
         		</li>
       		
 		</ul>
@@ -362,6 +366,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Apache</a>
               </li>
              
@@ -378,23 +386,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Matlab</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">神经网络</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -410,6 +402,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Markdown</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Matlab</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">神经网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">径向基</a>
               </li>
              
@@ -422,15 +426,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">进程通信</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">信号</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
+                <a href="javascript:void(0)" class="js-tag color3">PHP求职宝典</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -438,19 +434,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">PHP求职宝典</a>
+                <a href="javascript:void(0)" class="js-tag color5">垃圾回收</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">信号量</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">进程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+                <a href="javascript:void(0)" class="js-tag color5">进程通信</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -458,15 +446,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+                <a href="javascript:void(0)" class="js-tag color3">信号</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">url</a>
+                <a href="javascript:void(0)" class="js-tag color4">信号量</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -478,6 +462,42 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">管道</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">进程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">pcntl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">TCP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ThinkPHP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">url</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">golang</a>
               </li>
              
@@ -486,23 +506,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">FastCGI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ThinkPHP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">消息队列</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">正则</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -514,11 +518,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">正则</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">echo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">SEO</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -534,19 +546,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">管道</a>
+                <a href="javascript:void(0)" class="js-tag color3">reflect</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">随笔</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">反射</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">SEO</a>
               </li>
             
             <div class="clearfix"></div>
